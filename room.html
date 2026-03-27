@@ -15,12 +15,21 @@
 
     .main { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
 
-    .room-header { text-align: center; margin-bottom: 40px; }
+    .room-header { text-align: center; margin-bottom: 20px; }
     .room-header h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
     .room-code { font-family: monospace; font-size: 20px; color: #00ff88; letter-spacing: 4px; }
     .live-chip { display: inline-block; margin-top: 12px; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; background: rgba(0,255,136,0.1); color: #00ff88; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #00ff88; margin-right: 6px; animation: blink 1s infinite; }
+
+    .contract-info { background: #0a0f1a; border: 1px solid #7c3aed; border-radius: 10px; padding: 14px; margin-bottom: 20px; text-align: center; }
+
+    .share-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid #1e1e2e; color: #8888aa; padding: 8px 16px; border-radius: 8px; font-family: "Syne", sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
+    .share-btn:hover { border-color: #00ff88; color: #00ff88; }
+
+    .player-list { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .player-avatar { display: flex; align-items: center; gap: 8px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 10px; padding: 8px 14px; }
+    .avatar-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: #0a0a0f; }
 
     .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
     .panel { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 30px; }
@@ -40,6 +49,16 @@
     .sb-bar { height: 100%; background: linear-gradient(90deg, #00ff88, #7c3aed); border-radius: 4px; transition: width 0.5s; }
     .sb-empty { color: #8888aa; font-size: 14px; text-align: center; padding: 20px 0; }
 
+    .waiting-section { text-align: center; padding: 30px; background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; margin-top: 30px; }
+    .waiting-section h3 { color: #8888aa; font-size: 16px; margin-bottom: 8px; }
+    .waiting-dots { font-size: 24px; }
+    @keyframes waitDots { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+    .waiting-dots span { animation: waitDots 1.5s infinite; }
+    .waiting-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .waiting-dots span:nth-child(3) { animation-delay: 0.4s; }
+    .player-count-big { font-size: 48px; font-weight: 800; color: #f0f0f0; margin: 10px 0; }
+    .player-count-big span { color: #00ff88; }
+
     .room-footer { text-align: center; margin-top: 40px; }
     .btn-play { display: inline-block; padding: 18px 48px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 800; font-size: 20px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; }
     .btn-play:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.3); }
@@ -49,13 +68,14 @@
       .panels { grid-template-columns: 1fr; }
       .navbar { padding: 16px 20px; }
       .big-number { font-size: 28px; }
+      .player-count-big { font-size: 36px; }
     }
   </style>
 </head>
 <body>
   <nav class="navbar">
     <div class="logo">ZENTO</div>
-    <a class="back-link" href="lobby.html">← Lobby</a>
+    <a class="back-link" href="index.html">&larr; Inicio</a>
   </nav>
 
   <div class="main">
@@ -63,26 +83,44 @@
       <h1 id="roomName">Cargando...</h1>
       <div class="room-code" id="roomCode"></div>
       <div class="live-chip"><span class="live-dot"></span>EN VIVO</div>
+      <br>
+      <button class="share-btn" onclick="copyRoomLink(this)">&#128203; Copiar link de sala</button>
     </div>
+
+    <div class="contract-info" id="contractInfo" style="display:none;">
+      <div style="font-size:11px;color:#8888aa;">&#9939; Smart Contract en Monad Testnet</div>
+      <div id="contractAddr" style="font-family:monospace;font-size:13px;color:#a78bfa;word-break:break-all;margin:6px 0;"></div>
+      <a id="contractExplorerLink" href="#" target="_blank" style="font-size:11px;color:#7c3aed;">Ver en Explorer &rarr;</a>
+    </div>
+
+    <div id="playerList" class="player-list"></div>
 
     <div class="panels">
       <div class="panel">
         <h2>Pool Total</h2>
-        <div class="big-number" id="poolTotal">$0 MXN</div>
+        <div class="big-number" id="poolTotal">0.0 MON</div>
         <div style="margin-top: 30px;"></div>
         <h2>Yield Acumulado</h2>
-        <div class="big-number green" id="yieldDisplay">$0.000000 MXN</div>
-        <div class="small-note">~9% APY en CETES gubernamentales</div>
+        <div class="big-number green" id="yieldDisplay">0.00000000 MON</div>
+        <div class="small-note">~9% APY &mdash; yield en tiempo real</div>
       </div>
 
       <div class="panel">
         <h2>Tabla de Posiciones</h2>
-        <div id="scoreboard"><div class="sb-empty">Sin jugadores aún</div></div>
+        <div id="scoreboard"><div class="sb-empty">Sin jugadores a&uacute;n</div></div>
       </div>
     </div>
 
-    <div class="room-footer">
-      <a class="btn-play" id="btnPlay" href="#">🎮 JUGAR AHORA</a>
+    <div class="waiting-section" id="waitingSection" style="display:none;">
+      <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
+      <h3>Esperando m&aacute;s jugadores...</h3>
+      <div class="player-count-big" id="playerCountDisplay"><span>1</span> / 2 min</div>
+      <p style="color:#8888aa;font-size:13px;">Comparte el c&oacute;digo de la sala para que otros se unan</p>
+      <button class="share-btn" onclick="copyRoomLink(this)">&#128203; Compartir sala</button>
+    </div>
+
+    <div class="room-footer" id="roomFooter">
+      <a class="btn-play" id="btnPlay" href="#">&#127918; JUGAR AHORA</a>
       <div class="room-estado" id="roomEstado"></div>
     </div>
   </div>
@@ -91,7 +129,7 @@
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get("roomId");
     const userId = localStorage.getItem("zento_user_id") || params.get("userId");
-    if (!roomId) window.location.href = "lobby.html";
+    if (!roomId) window.location.href = "index.html";
 
     document.getElementById('btnPlay').href = 'trivia.html?roomId=' + roomId;
 
@@ -101,21 +139,21 @@
     function renderScoreboard(players) {
       const sb = document.getElementById('scoreboard');
       if (!players || players.length === 0) {
-        sb.innerHTML = '<div class="sb-empty">Sin jugadores aún</div>';
+        sb.innerHTML = '<div class="sb-empty">Sin jugadores a\u00FAn</div>';
         return;
       }
       const sorted = [...players].sort((a, b) => b.score - a.score);
       const maxScore = sorted[0].score || 1;
       sb.innerHTML = sorted.map((p, i) => {
-        const pos = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+        const pos = i === 0 ? '\uD83E\uDD47' : i === 1 ? '\uD83E\uDD48' : i === 2 ? '\uD83E\uDD49' : '#' + (i + 1);
         const isLeader = i === 0 && p.score > 0;
         const barW = maxScore > 0 ? (p.score / maxScore * 100) : 0;
-        return `<div class="sb-row">
-          <div class="sb-pos">${pos}</div>
-          <div class="sb-name ${isLeader ? 'leader' : ''}">${isLeader ? '👑 ' : ''}${p.nombre || p.userId}</div>
-          <div class="sb-bar-wrap"><div class="sb-bar" style="width:${barW}%"></div></div>
-          <div class="sb-score">${p.score} pts</div>
-        </div>`;
+        return '<div class="sb-row">' +
+          '<div class="sb-pos">' + pos + '</div>' +
+          '<div class="sb-name ' + (isLeader ? 'leader' : '') + '">' + (isLeader ? '\uD83D\uDC51 ' : '') + (p.nombre || p.userId) + '</div>' +
+          '<div class="sb-bar-wrap"><div class="sb-bar" style="width:' + barW + '%"></div></div>' +
+          '<div class="sb-score">' + p.score + ' pts</div>' +
+        '</div>';
       }).join('');
     }
 
@@ -129,8 +167,46 @@
         document.getElementById('roomCode').textContent = data.id;
         document.getElementById('roomEstado').textContent = 'Estado: ' + data.estado;
 
-        pool = data.montoEntrada * (data.jugadores || []).length;
-        document.getElementById('poolTotal').textContent = '$' + pool.toFixed(0) + ' MXN';
+        const players = data.players || [];
+        const playerCount = players.length;
+
+        // Pool in MON
+        pool = 0.1 * playerCount;
+        document.getElementById('poolTotal').textContent = pool.toFixed(1) + ' MON';
+
+        // Contract info
+        if (data.contractAddress) {
+          document.getElementById('contractInfo').style.display = 'block';
+          document.getElementById('contractAddr').textContent = data.contractAddress;
+          document.getElementById('contractExplorerLink').href = 'https://testnet.monadexplorer.com/address/' + data.contractAddress;
+        }
+
+        // Player avatars
+        var colors = ['#00ff88', '#7c3aed', '#ff4466', '#ffaa00', '#00aaff', '#ff66cc'];
+        var playerListEl = document.getElementById('playerList');
+        playerListEl.innerHTML = players.map(function(p, i) {
+          var name = p.nombre || p.userId;
+          var initial = name.charAt(0).toUpperCase();
+          var color = colors[i % colors.length];
+          return '<div class="player-avatar">' +
+            '<div class="avatar-circle" style="background:' + color + '">' + initial + '</div>' +
+            '<span style="font-size:14px;font-weight:600;">' + name + '</span>' +
+          '</div>';
+        }).join('') || '<div style="color:#8888aa;font-size:14px;">Sin jugadores a\u00FAn</div>';
+
+        // Waiting section
+        var waitingSection = document.getElementById('waitingSection');
+        var footerSection = document.getElementById('roomFooter');
+        if (playerCount < 2) {
+          waitingSection.style.display = 'block';
+          document.getElementById('playerCountDisplay').innerHTML = '<span>' + playerCount + '</span> / 2 min';
+          footerSection.querySelector('.btn-play').style.opacity = '0.5';
+          footerSection.querySelector('.btn-play').style.pointerEvents = 'none';
+        } else {
+          waitingSection.style.display = 'none';
+          footerSection.querySelector('.btn-play').style.opacity = '1';
+          footerSection.querySelector('.btn-play').style.pointerEvents = 'auto';
+        }
 
         if (data.startTime) {
           startTimeMs = new Date(data.startTime).getTime();
@@ -138,15 +214,23 @@
           if (!startTimeMs) startTimeMs = Date.now();
         }
 
-        renderScoreboard(data.players);
+        renderScoreboard(players);
       } catch (e) { /* retry next interval */ }
     }
 
     function updateYield() {
       if (!startTimeMs) return;
-      const elapsed = (Date.now() - startTimeMs) / 1000;
-      const yieldVal = pool * 0.09 * elapsed / (365 * 24 * 3600);
-      document.getElementById('yieldDisplay').textContent = '$' + yieldVal.toFixed(6) + ' MXN';
+      var elapsed = (Date.now() - startTimeMs) / 1000;
+      var yieldVal = pool * 0.09 * elapsed / (365 * 24 * 3600);
+      document.getElementById('yieldDisplay').textContent = yieldVal.toFixed(8) + ' MON';
+    }
+
+    function copyRoomLink(btn) {
+      var link = window.location.origin + '/room.html?roomId=' + roomId;
+      navigator.clipboard.writeText(link).then(function() {
+        btn.textContent = '\u2705 \u00A1Copiado!';
+        setTimeout(function() { btn.innerHTML = '\uD83D\uDCCB Copiar link de sala'; }, 2000);
+      });
     }
 
     fetchRoom();

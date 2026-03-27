@@ -20,7 +20,7 @@ async function listRooms(req, res) {
 
 async function createRoom(req, res) {
   try {
-    const { nombre, juego, montoEntrada, diasDuracion, creadorId } = req.body;
+    const { nombre, juego, montoEntrada, diasDuracion, creadorId, contractAddress } = req.body;
     if (!nombre || !juego || !montoEntrada || !diasDuracion) {
       return res.status(400).json({ error: 'Campos requeridos: nombre, juego, montoEntrada, diasDuracion' });
     }
@@ -37,6 +37,7 @@ async function createRoom(req, res) {
       estado: 'waiting',
       jugadores: [],
       creadorId: creadorId || null,
+      contractAddress: contractAddress || null,
       createdAt: new Date().toISOString()
     });
     return res.status(201).json(room);
@@ -91,14 +92,22 @@ async function joinRoom(req, res) {
     const { userId } = req.body;
     const room = db.getRoomById(req.params.roomId);
     if (!room) return res.status(404).json({ error: 'Sala no encontrada' });
-    if (room.estado !== 'waiting') return res.status(400).json({ error: 'La sala no está en espera' });
+    if (room.estado === 'playing') return res.status(400).json({ error: 'La sala ya está en juego' });
+    if (room.estado === 'finished') return res.status(400).json({ error: 'La sala ya terminó' });
 
     const existing = db.getPlayerInRoom(userId, room.id);
     if (existing) return res.status(400).json({ error: 'Ya estás en esta sala' });
 
     db.addPlayerToRoom(userId, room.id, 0);
     const updated = db.getRoomById(room.id);
-    return res.json(updated);
+
+    const players = db.getRoomPlayers(room.id);
+    const playerList = players.map(p => {
+      const user = db.getUserById(p.userId);
+      return { userId: p.userId, nombre: user?.apodo || user?.nombre || p.userId, score: p.score, status: p.status };
+    });
+
+    return res.json({ ...updated, players: playerList });
   } catch (err) {
     console.error('[rooms] join error:', err.message);
     return res.status(500).json({ error: err.message });

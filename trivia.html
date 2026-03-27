@@ -18,29 +18,45 @@
 
     .q-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .q-num { font-size: 14px; color: #8888aa; font-weight: 600; }
-    .timer { font-family: monospace; font-size: 36px; font-weight: 700; }
+
+    .timer-circle { position: relative; width: 80px; height: 80px; margin: 0 auto 20px; }
+    .timer-circle svg { transform: rotate(-90deg); }
+    .timer-circle circle { fill: none; stroke-width: 4; }
+    .timer-circle .bg { stroke: #1e1e2e; }
+    .timer-circle .progress { stroke: #00ff88; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+    .timer-circle .time-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: monospace; font-size: 28px; font-weight: 700; }
 
     .progress-bar { width: 100%; height: 6px; background: #1e1e2e; border-radius: 3px; margin-bottom: 30px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 3px; transition: width 1s linear, background-color 1s; }
 
-    .question-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px 30px; margin-bottom: 24px; text-align: center; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .question-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px 30px; margin-bottom: 24px; text-align: center; animation: slideIn 0.4s ease-out; }
     .question-card h2 { font-size: 22px; font-weight: 700; line-height: 1.4; }
 
     .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .opt-btn { background: #12121a; border: 2px solid #1e1e2e; border-radius: 12px; padding: 18px 20px; color: #f0f0f0; font-family: "Syne", sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: left; }
     .opt-btn:hover:not(:disabled) { border-color: #7c3aed; background: rgba(124,58,237,0.1); }
     .opt-btn:disabled { cursor: default; opacity: 0.7; }
-    .opt-btn.correct { border-color: #00ff88; background: rgba(0,255,136,0.15); color: #00ff88; }
-    .opt-btn.wrong { border-color: #ff4466; background: rgba(255,68,102,0.15); color: #ff4466; }
+    .opt-btn.correct { border-color: #00ff88; background: rgba(0,255,136,0.15); color: #00ff88; animation: correctPulse 0.5s; }
+    .opt-btn.wrong { border-color: #ff4466; background: rgba(255,68,102,0.15); color: #ff4466; animation: wrongShake 0.5s; }
+    @keyframes correctPulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    @keyframes wrongShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-    .feedback { text-align: center; margin-top: 16px; font-size: 20px; font-weight: 700; min-height: 30px; }
-    .feedback.good { color: #00ff88; }
-    .feedback.bad { color: #ff4466; }
+    .feedback { min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; font-size: 20px; font-weight: 700; }
+    .feedback.good { color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.3); }
+    .feedback.bad { color: #ff4466; text-shadow: 0 0 15px rgba(255,68,102,0.3); }
 
     .results { display: none; text-align: center; }
-    .results h1 { font-size: 48px; margin-bottom: 8px; }
-    .results .score-final { font-family: monospace; font-size: 64px; color: #00ff88; text-shadow: 0 0 30px rgba(0,255,136,0.3); margin: 20px 0; }
+    .results h1 { font-size: 64px; margin-bottom: 8px; }
+    @keyframes scoreReveal { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .score-final { font-family: monospace; font-size: 72px; color: #00ff88; text-shadow: 0 0 40px rgba(0,255,136,0.4); margin: 20px 0; animation: scoreReveal 0.8s ease-out; }
     .results .message { font-size: 20px; color: #8888aa; margin-bottom: 30px; }
+
+    .rank-badge { display: inline-block; padding: 8px 24px; border-radius: 30px; font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+    .rank-gold { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
+    .rank-silver { background: rgba(192,192,192,0.15); color: #c0c0c0; border: 1px solid rgba(192,192,192,0.3); }
+    .rank-bronze { background: rgba(205,127,50,0.15); color: #cd7f32; border: 1px solid rgba(205,127,50,0.3); }
+
     .btn-back { display: inline-block; padding: 16px 40px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; text-decoration: none; transition: opacity 0.2s; }
     .btn-back:hover { opacity: 0.85; }
 
@@ -56,7 +72,9 @@
     @media (max-width: 600px) {
       .options { grid-template-columns: 1fr; }
       .question-card h2 { font-size: 18px; }
-      .timer { font-size: 28px; }
+      .timer-circle { width: 64px; height: 64px; }
+      .timer-circle svg { width: 64px; height: 64px; }
+      .timer-circle .time-text { font-size: 22px; }
     }
   </style>
 </head>
@@ -71,10 +89,17 @@
     <div class="game-area" id="gameArea">
       <div class="q-info">
         <span class="q-num" id="qNum">Pregunta 1 / 10</span>
-        <span class="timer" id="timerNum">20</span>
+        <div class="timer-circle" id="timerCircle">
+          <svg width="80" height="80">
+            <circle class="bg" cx="40" cy="40" r="36"></circle>
+            <circle class="progress" id="timerProgress" cx="40" cy="40" r="36"
+              stroke-dasharray="226.2" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="time-text" id="timerNum">20</div>
+        </div>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:100%;background:#00ff88"></div></div>
-      <div class="question-card"><h2 id="qText">Cargando...</h2></div>
+      <div class="question-card" id="questionCard"><h2 id="qText">Cargando...</h2></div>
       <div class="options" id="optionsGrid"></div>
       <div class="feedback" id="feedback"></div>
     </div>
@@ -82,6 +107,7 @@
     <div class="results" id="resultsArea">
       <h1 id="resultEmoji">🏆</h1>
       <div class="score-final" id="scoreFinal">0</div>
+      <div class="rank-badge" id="rankBadge" style="display:none;"></div>
       <div class="message" id="resultMsg">¡Buen trabajo!</div>
       <div class="final-sb" id="finalSb" style="display:none">
         <h3>Tabla de posiciones</h3>
@@ -95,10 +121,12 @@
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get("roomId");
     const userId = localStorage.getItem("zento_user_id") || params.get("userId");
-    if (!roomId || !userId) window.location.href = "lobby.html";
+    if (!roomId || !userId) window.location.href = "room.html";
 
     document.getElementById('backLink').href = 'room.html?roomId=' + roomId;
     document.getElementById('btnBackRoom').href = 'room.html?roomId=' + roomId;
+
+    const circumference = 2 * Math.PI * 36; // 226.2
 
     const questions = [
       { q: "¿Qué son los CETES?", opts: ["Certificados del Tesoro de los Estados Unidos Mexicanos","Acciones del gobierno mexicano","Moneda digital del Banco de México","Bonos corporativos de PEMEX"], correct: 0 },
@@ -122,6 +150,12 @@
       document.getElementById('feedback').textContent = '';
       document.getElementById('feedback').className = 'feedback';
 
+      // Re-trigger question card animation
+      const card = document.getElementById('questionCard');
+      card.style.animation = 'none';
+      card.offsetHeight; // force reflow
+      card.style.animation = '';
+
       const grid = document.getElementById('optionsGrid');
       grid.innerHTML = q.opts.map((opt, i) =>
         `<button class="opt-btn" onclick="answer(${i})">${opt}</button>`
@@ -132,13 +166,29 @@
       document.getElementById('progressBar').style.width = '100%';
       document.getElementById('progressBar').style.background = '#00ff88';
 
+      // Reset circular timer
+      const timerProgress = document.getElementById('timerProgress');
+      timerProgress.style.strokeDasharray = circumference;
+      timerProgress.style.strokeDashoffset = '0';
+      timerProgress.style.stroke = '#00ff88';
+
       timer = setInterval(() => {
         timeLeft--;
         document.getElementById('timerNum').textContent = timeLeft;
-        const pct = (timeLeft / 20) * 100;
-        document.getElementById('progressBar').style.width = pct + '%';
-        if (pct > 50) document.getElementById('progressBar').style.background = '#00ff88';
-        else if (pct > 25) document.getElementById('progressBar').style.background = '#ffaa00';
+        const pct = timeLeft / 20;
+        const pctBar = pct * 100;
+        document.getElementById('progressBar').style.width = pctBar + '%';
+
+        // Update circular timer
+        const offset = circumference * (1 - pct);
+        timerProgress.style.strokeDashoffset = offset;
+        if (pct > 0.5) timerProgress.style.stroke = '#00ff88';
+        else if (pct > 0.25) timerProgress.style.stroke = '#ffaa00';
+        else timerProgress.style.stroke = '#ff4466';
+
+        // Update progress bar color
+        if (pctBar > 50) document.getElementById('progressBar').style.background = '#00ff88';
+        else if (pctBar > 25) document.getElementById('progressBar').style.background = '#ffaa00';
         else document.getElementById('progressBar').style.background = '#ff4466';
 
         if (timeLeft <= 0) {
@@ -198,6 +248,20 @@
       } else {
         document.getElementById('resultEmoji').textContent = '📚';
         document.getElementById('resultMsg').textContent = 'Sigue estudiando';
+      }
+
+      // Show rank badge
+      const rankBadge = document.getElementById('rankBadge');
+      rankBadge.style.display = 'inline-block';
+      if (totalScore >= 800) {
+        rankBadge.textContent = '🥇 Rango: Maestro Financiero';
+        rankBadge.className = 'rank-badge rank-gold';
+      } else if (totalScore >= 500) {
+        rankBadge.textContent = '🥈 Rango: Aprendiz Avanzado';
+        rankBadge.className = 'rank-badge rank-silver';
+      } else {
+        rankBadge.textContent = '🥉 Rango: Novato';
+        rankBadge.className = 'rank-badge rank-bronze';
       }
 
       try {

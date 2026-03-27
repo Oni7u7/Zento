@@ -34,19 +34,21 @@
     .btn-logout:hover { border-color: #ff4466; color: #ff4466; }
 
     /* ── HERO ── */
-    .hero { text-align: center; padding: 70px 20px 50px; }
+    .hero { text-align: center; padding: 50px 20px 30px; }
     .hero h1 { font-size: clamp(32px, 6vw, 58px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 16px; }
     .hero h1 span { color: #00ff88; }
     .hero p  { font-size: 17px; color: #8888aa; max-width: 500px; margin: 0 auto 32px; line-height: 1.7; }
-    .yield-ticker { display: inline-flex; align-items: center; gap: 10px; background: #0a0f1a; border: 1px solid #00ff88; border-radius: 30px; padding: 10px 22px; margin-bottom: 32px; }
+    .yield-ticker { display: inline-flex; align-items: center; gap: 10px; background: #0a0f1a; border: 1px solid #00ff88; border-radius: 30px; padding: 10px 22px; margin-bottom: 32px; animation: tickerGlow 3s infinite; }
     .yield-ticker span:first-child { font-size: 12px; color: #8888aa; }
     .yield-ticker .num { font-family: monospace; font-size: 22px; color: #00ff88; font-weight: 700; }
 
+    @keyframes tickerGlow { 0%, 100% { box-shadow: 0 0 15px rgba(0,255,136,0.1); } 50% { box-shadow: 0 0 25px rgba(0,255,136,0.25); } }
+
     /* ── STEPS ── */
-    .steps { display: flex; justify-content: center; gap: 0; max-width: 800px; margin: 0 auto 60px; flex-wrap: wrap; }
-    .step { flex: 1; min-width: 160px; text-align: center; padding: 20px 16px; position: relative; }
-    .step:not(:last-child)::after { content: '→'; position: absolute; right: -8px; top: 32px; color: #1e1e2e; font-size: 20px; }
-    .step-icon { font-size: 28px; margin-bottom: 10px; }
+    .steps { display: flex; justify-content: center; gap: 16px; max-width: 900px; margin: 0 auto 60px; flex-wrap: wrap; padding: 0 20px; }
+    .step { flex: 1; min-width: 160px; text-align: center; padding: 24px 16px; position: relative; background: #12121a; border-radius: 12px; border: 1px solid #1e1e2e; }
+    .step:not(:last-child)::after { content: '→'; position: absolute; right: -14px; top: 36px; color: #1e1e2e; font-size: 20px; z-index: 1; }
+    .step-icon { font-size: 40px; margin-bottom: 10px; }
     .step h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .step p  { font-size: 12px; color: #8888aa; line-height: 1.5; }
 
@@ -81,7 +83,9 @@
 
     /* Active rooms */
     .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .room-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; cursor: pointer; transition: border-color 0.2s; }
+    .room-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; cursor: pointer; transition: border-color 0.2s; position: relative; overflow: hidden; }
+    .room-card::before { content: ''; position: absolute; inset: 0; border-radius: 12px; padding: 1px; background: linear-gradient(135deg, transparent, transparent); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; transition: background 0.3s; pointer-events: none; }
+    .room-card:hover::before { background: linear-gradient(135deg, #00ff88, #7c3aed); }
     .room-card:hover { border-color: #7c3aed; }
     .room-card h3 { font-size: 15px; margin-bottom: 6px; }
     .room-card .meta { font-size: 12px; color: #8888aa; margin-bottom: 8px; }
@@ -91,10 +95,18 @@
     .chip-playing  { background: rgba(124,58,237,0.1); color: #7c3aed; }
     .chip-finished { background: rgba(136,136,170,0.1); color: #8888aa; }
 
+    .player-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(124,58,237,0.15); color: #a78bfa; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .live-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,68,102,0.1); color: #ff4466; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+    /* Step number indicators for create room */
+    .step-indicator { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #7c3aed; color: #fff; font-size: 12px; font-weight: 700; margin-right: 6px; }
+    .step-indicator.done { background: #00ff88; color: #0a0a0f; }
+
     /* Modal overlay */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; transition: opacity 0.3s ease; }
     .modal-overlay.show { display: flex; }
-    .modal { background: #12121a; border: 1px solid #1e1e2e; border-radius: 18px; padding: 40px; width: 100%; max-width: 420px; }
+    .modal { background: #12121a; border: 1px solid #1e1e2e; border-radius: 18px; padding: 40px; width: 100%; max-width: 420px; transform: translateY(0); transition: transform 0.3s ease; }
     .modal-close { float: right; background: none; border: none; color: #8888aa; font-size: 22px; cursor: pointer; line-height: 1; margin-top: -8px; }
     .modal-close:hover { color: #fff; }
     .modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 28px; }
@@ -136,6 +148,7 @@
       .columns { grid-template-columns: 1fr; }
       .navbar { padding: 14px 20px; }
       .step:not(:last-child)::after { display: none; }
+      .steps { gap: 10px; }
     }
   </style>
 </head>
@@ -225,7 +238,10 @@
 
           <!-- Paso 1: deploy contrato -->
           <div id="contractStep" style="margin-bottom:14px;">
-            <div style="font-size:12px;color:#8888aa;margin-bottom:8px;">Paso 1 de 2 — Deploy del contrato en Monad Testnet</div>
+            <div style="font-size:12px;color:#8888aa;margin-bottom:8px;display:flex;align-items:center;">
+              <span class="step-indicator" id="createStep1Indicator">1</span>
+              Deploy del contrato en Monad Testnet
+            </div>
             <button type="button" id="btnDeployRoom" class="btn-secondary" onclick="deployRoomContract()" disabled>
               ⛓ Desplegar contrato con MetaMask
             </button>
@@ -237,7 +253,10 @@
           </div>
 
           <!-- Paso 2: crear sala en backend -->
-          <div style="font-size:12px;color:#8888aa;margin-bottom:8px;" id="step2Label" style="opacity:0.4;">Paso 2 de 2 — Registrar sala</div>
+          <div style="font-size:12px;color:#8888aa;margin-bottom:8px;display:flex;align-items:center;" id="step2Label">
+            <span class="step-indicator" id="createStep2Indicator">2</span>
+            Registrar sala
+          </div>
           <button type="submit" class="btn-primary" id="btnCreateRoom" disabled>Crear sala →</button>
           <div class="msg" id="createMsg"></div>
         </form>
@@ -246,7 +265,7 @@
       <!-- Unirse a sala -->
       <div class="panel">
         <h2>🔍 Unirse a sala</h2>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:18px;">
           <label>Código de sala</label>
           <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6">
         </div>
@@ -258,7 +277,17 @@
           <div class="detail"><span>Entrada</span><span id="ri-monto"></span></div>
           <div class="detail"><span>Estado</span><span id="ri-estado"></span></div>
           <div class="detail"><span>Jugadores</span><span id="ri-jugadores"></span></div>
-          <button class="btn-primary" style="margin-top:14px;" onclick="joinRoom()">Unirse →</button>
+          <button class="btn-primary" id="btnJoinRoom" style="margin-top:14px;" onclick="joinRoom()">Unirse →</button>
+          <div id="depositPanel" style="display:none; margin-top:14px; padding:18px; background:#0a0f1a; border:1px solid #7c3aed; border-radius:12px;">
+            <div style="text-align:center; margin-bottom:12px;">
+              <div style="font-size:13px; color:#8888aa;">Depositar para unirse</div>
+              <div style="font-size:28px; font-weight:700; color:#00ff88; margin:8px 0;">0.1 MON</div>
+            </div>
+            <button class="btn-primary" id="btnDeposit" onclick="depositAndJoin()" style="background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#fff;">
+              💰 Depositar con MetaMask
+            </button>
+            <div style="font-size:11px; color:#8888aa; text-align:center; margin-top:8px;">Se ejecutará deposit() en el smart contract</div>
+          </div>
           <div class="msg" id="joinMsg"></div>
         </div>
         <div class="msg" id="searchMsg"></div>
@@ -339,6 +368,7 @@
     let currentUser = { id: null, name: null, wallet: null };
     let createdRoomId = null;
     let foundRoomId = null;
+    let foundRoomContractAddress = null;
 
     // ── INIT ──
     function init() {
@@ -512,14 +542,23 @@
         const rooms = await res.json();
         const grid = document.getElementById('roomsGrid');
         if (!rooms.length) { grid.innerHTML = '<div style="color:#8888aa;font-size:14px;">No hay salas activas aún. ¡Crea la primera!</div>'; return; }
-        grid.innerHTML = rooms.map(r => `
-          <div class="room-card" onclick="quickJoin('${r.id}')">
-            <h3>${r.nombre}<span class="chip chip-${r.estado}">${r.estado}</span></h3>
-            <div class="meta">${r.juego} · ${r.montoEntrada || 0.1} MON · ${r.diasDuracion} días</div>
-            <div class="code">${r.id}</div>
-            ${r.contractAddress ? `<div style="font-size:11px;color:#7c3aed;margin-top:6px;font-family:monospace;">⛓ ${r.contractAddress.slice(0,10)}...${r.contractAddress.slice(-6)}</div>` : ''}
-          </div>
-        `).join('');
+        grid.innerHTML = rooms.map(r => {
+          const playerCount = (r.jugadores||[]).length;
+          const isLive = playerCount > 0;
+          return `
+            <div class="room-card" onclick="quickJoin('${r.id}')">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <h3 style="margin:0;">${r.nombre}<span class="chip chip-${r.estado}">${r.estado}</span></h3>
+                ${isLive ? '<span class="live-badge">🔴 EN VIVO</span>' : ''}
+              </div>
+              <div class="meta">${r.juego} · ${r.montoEntrada || 0.1} MON · ${r.diasDuracion} días</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+                <div class="code">${r.id}</div>
+                <span class="player-badge">👥 ${playerCount}</span>
+              </div>
+              ${r.contractAddress ? '<div style="font-size:11px;color:#7c3aed;margin-top:6px;font-family:monospace;">⛓ '+r.contractAddress.slice(0,10)+'...'+r.contractAddress.slice(-6)+'</div>' : ''}
+            </div>`;
+        }).join('');
       } catch(e) { document.getElementById('roomsGrid').innerHTML = '<div style="color:#8888aa;font-size:14px;">No se pudieron cargar las salas.</div>'; }
     }
 
@@ -572,12 +611,16 @@
       const msgEl = document.getElementById('searchMsg');
       const infoEl = document.getElementById('roomInfo');
       msgEl.className='msg'; msgEl.style.display='none'; infoEl.style.display='none';
+      // Reset deposit panel
+      document.getElementById('depositPanel').style.display = 'none';
+      document.getElementById('btnJoinRoom').style.display = 'block';
       if (!code) return;
       try {
         const res = await fetch('/api/rooms/' + code);
         if (!res.ok) { msgEl.textContent='Sala no encontrada'; msgEl.className='msg error'; return; }
         const r = await res.json();
         foundRoomId = r.id;
+        foundRoomContractAddress = r.contractAddress || null;
         document.getElementById('ri-nombre').textContent = r.nombre;
         document.getElementById('ri-juego').textContent  = r.juego;
         document.getElementById('ri-monto').textContent  = (r.montoEntrada || 0.1) + ' MON';
@@ -592,7 +635,7 @@
           cd.className = 'contract-info';
           cd.style = 'margin-top:10px;padding:10px;background:#0a0f1a;border:1px solid #7c3aed;border-radius:8px;';
           cd.innerHTML = `<div style="font-size:11px;color:#8888aa;">⛓ Contrato en Monad Testnet</div><div style="font-family:monospace;font-size:12px;color:#a78bfa;word-break:break-all;margin-top:4px;">${r.contractAddress}</div><a href="https://testnet.monadexplorer.com/address/${r.contractAddress}" target="_blank" style="font-size:11px;color:#7c3aed;">Ver en Explorer →</a>`;
-          ri.insertBefore(cd, ri.querySelector('button'));
+          ri.insertBefore(cd, ri.querySelector('#btnJoinRoom'));
         }
         infoEl.style.display = 'block';
       } catch(err) { msgEl.textContent='Error al buscar sala'; msgEl.className='msg error'; }
@@ -603,12 +646,47 @@
       if (!foundRoomId) return;
       const msgEl = document.getElementById('joinMsg');
       msgEl.className='msg'; msgEl.style.display='none';
+      // If room has contract and user has wallet, show deposit flow
+      if (foundRoomContractAddress && currentUser.wallet) {
+        document.getElementById('depositPanel').style.display = 'block';
+        document.getElementById('btnJoinRoom').style.display = 'none';
+        return;
+      }
+      // Otherwise join directly (mock)
       try {
         const res = await fetch('/api/rooms/'+foundRoomId+'/join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUser.id}) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error||'Error al unirse');
-        window.location.href = `room.html?roomId=${foundRoomId}&userId=${currentUser.id}`;
+        window.location.href = 'room.html?roomId='+foundRoomId+'&userId='+currentUser.id;
       } catch(err) { msgEl.textContent=err.message; msgEl.className='msg error'; }
+    }
+
+    async function depositAndJoin() {
+      if (!foundRoomId || !foundRoomContractAddress) return;
+      const btn = document.getElementById('btnDeposit');
+      btn.disabled = true;
+      btn.textContent = '⏳ Confirma en MetaMask...';
+      try {
+        if (!ethersProvider) {
+          ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+          ethersSigner = ethersProvider.getSigner();
+        }
+        const contract = new ethers.Contract(foundRoomContractAddress, ZENTO_CONTRACTS.room.abi, ethersSigner);
+        const tx = await contract.deposit({ value: ethers.utils.parseEther("0.1") });
+        btn.textContent = '⏳ Esperando confirmación...';
+        await tx.wait();
+        // Now join via API
+        const res = await fetch('/api/rooms/'+foundRoomId+'/join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUser.id}) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error||'Error al unirse');
+        window.location.href = 'room.html?roomId='+foundRoomId+'&userId='+currentUser.id;
+      } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = '💰 Depositar con MetaMask';
+        const msgEl = document.getElementById('joinMsg');
+        msgEl.textContent = 'Error: ' + (e.reason || e.message);
+        msgEl.className = 'msg error';
+      }
     }
 
     function quickJoin(roomId) {
@@ -679,6 +757,10 @@
         btn.style.background = 'rgba(0,255,136,0.15)';
         btn.style.color = '#00ff88';
         btn.style.border = '1px solid #00ff88';
+
+        // Update step indicator
+        document.getElementById('createStep1Indicator').classList.add('done');
+        document.getElementById('createStep1Indicator').textContent = '✓';
 
         // Habilitar paso 2
         document.getElementById('btnCreateRoom').disabled = false;
