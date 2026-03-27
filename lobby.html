@@ -79,6 +79,11 @@
   <nav class="navbar">
     <div class="logo">ZENTO</div>
     <div class="nav-right">
+      <div id="walletBadgeNav" style="display:none; align-items:center; gap:8px; background:#0a0f1a; border:1px solid #00ff88; border-radius:8px; padding:6px 14px;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;flex-shrink:0;display:inline-block;"></span>
+        <span id="navWalletAddr" style="font-family:monospace;font-size:13px;color:#00ff88;"></span>
+        <span style="font-size:11px;color:#8888aa;">Monad</span>
+      </div>
       <span>Hola, <strong id="userName"></strong></span>
       <button class="btn-logout" id="btnLogout">Salir</button>
     </div>
@@ -113,6 +118,27 @@
           <button type="submit" class="btn-primary">Crear sala →</button>
           <div class="msg" id="createMsg"></div>
         </form>
+
+        <!-- Depositar a CETES (solo si hay wallet) -->
+        <div id="depositSection" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid #1e1e2e;">
+          <h3 style="font-size:16px; margin-bottom:14px;">💰 Depositar a CETES</h3>
+          <div class="form-group">
+            <label>Código de sala</label>
+            <input type="text" id="depositRoomId" placeholder="SALA01" style="text-transform:uppercase;">
+          </div>
+          <div class="form-group">
+            <label>Monto (MXN)</label>
+            <input type="number" id="depositAmount" min="10" step="10" placeholder="100">
+          </div>
+          <button class="btn-secondary" onclick="depositToCetes()">Convertir MXN → CETES</button>
+          <div class="msg" id="depositMsg"></div>
+          <div id="depositResult" style="display:none; margin-top:14px; background:#0a0f1a; border:1px solid #00ff88; border-radius:10px; padding:16px;">
+            <div style="font-size:12px; color:#8888aa; margin-bottom:4px;">RECIBIRÁS APROX.</div>
+            <div id="cetesAmount" style="font-family:monospace; font-size:28px; color:#00ff88; font-weight:700;"></div>
+            <div style="font-size:11px; color:#8888aa; margin-top:4px;">CETES en Monad Testnet</div>
+            <div style="font-size:12px; color:#8888aa; margin-top:8px;">Order ID: <span id="depositOrderId" style="font-family:monospace; color:#f0f0f0;"></span></div>
+          </div>
+        </div>
       </div>
 
       <!-- Join Room -->
@@ -162,6 +188,56 @@
     const userId = localStorage.getItem("zento_user_id");
     const userName = localStorage.getItem("zento_user_name");
     document.getElementById('userName').textContent = userName;
+
+    // Mostrar wallet badge si está conectada
+    const wallet = localStorage.getItem("zento_wallet");
+    if (wallet) {
+      const nav = document.getElementById('walletBadgeNav');
+      nav.style.display = 'flex';
+      document.getElementById('navWalletAddr').textContent = wallet.slice(0,6)+'...'+wallet.slice(-4);
+      document.getElementById('depositSection').style.display = 'block';
+    }
+
+    // Depositar MXN → CETES
+    async function depositToCetes() {
+      const roomId = document.getElementById('depositRoomId').value.trim().toUpperCase();
+      const amount = parseFloat(document.getElementById('depositAmount').value);
+      const msgEl = document.getElementById('depositMsg');
+      const resultEl = document.getElementById('depositResult');
+      msgEl.className = 'msg'; msgEl.style.display = 'none';
+      resultEl.style.display = 'none';
+
+      if (!roomId || !amount) {
+        msgEl.textContent = 'Ingresa el código de sala y el monto';
+        msgEl.className = 'msg error'; return;
+      }
+      if (!wallet) {
+        msgEl.textContent = 'Necesitas conectar tu wallet primero';
+        msgEl.className = 'msg error'; return;
+      }
+
+      try {
+        msgEl.textContent = 'Obteniendo cotización...';
+        msgEl.className = 'msg'; msgEl.style.display = 'block';
+
+        const res = await fetch('/api/deposit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, roomId, amount })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al depositar');
+
+        msgEl.style.display = 'none';
+        document.getElementById('cetesAmount').textContent = (data.cetesAmount || '~') + ' CETES';
+        document.getElementById('depositOrderId').textContent = data.orderId || 'pendiente';
+        resultEl.style.display = 'block';
+      } catch(err) {
+        msgEl.textContent = err.message;
+        msgEl.className = 'msg error';
+      }
+    }
+    window.depositToCetes = depositToCetes;
 
     // Logout
     document.getElementById('btnLogout').addEventListener('click', () => {

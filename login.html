@@ -7,26 +7,71 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .logo { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 40px; }
-    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; }
-    .tabs { display: flex; gap: 0; margin-bottom: 30px; border-bottom: 1px solid #1e1e2e; }
-    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; color: #8888aa; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: "Syne", sans-serif; background: none; border-top: none; border-left: none; border-right: none; }
+    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; width: 100%; max-width: 440px; }
+
+    /* Wallet section */
+    .wallet-section { margin-bottom: 28px; }
+    .btn-wallet { width: 100%; padding: 16px; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; border: none; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: opacity 0.2s, transform 0.15s; }
+    .btn-wallet:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-wallet:disabled { opacity: 0.6; cursor: not-allowed; }
+    .wallet-badge { display: none; background: #0a0f1a; border: 1px solid #00ff88; border-radius: 10px; padding: 12px 16px; margin-top: 12px; align-items: center; gap: 10px; }
+    .wallet-badge.show { display: flex; }
+    .wallet-dot { width: 8px; height: 8px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 6px #00ff88; flex-shrink: 0; }
+    .wallet-addr { font-family: monospace; font-size: 14px; color: #00ff88; flex: 1; }
+    .wallet-network { font-size: 11px; color: #8888aa; }
+    .btn-wallet-enter { width: 100%; padding: 14px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 10px; font-family: "Syne", sans-serif; font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 12px; transition: opacity 0.2s; display: none; }
+    .btn-wallet-enter.show { display: block; }
+    .btn-wallet-enter:hover { opacity: 0.85; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: #8888aa; font-size: 13px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #1e1e2e; }
+
+    /* Form section */
+    .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid #1e1e2e; }
+    .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 13px; color: #8888aa; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: "Syne", sans-serif; background: none; border-top: none; border-left: none; border-right: none; }
     .tab.active { color: #00ff88; border-bottom-color: #00ff88; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; color: #8888aa; margin-bottom: 6px; }
-    .form-group input { width: 100%; padding: 12px 16px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 8px; color: #f0f0f0; font-size: 14px; font-family: "Syne", sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 5px; }
+    .form-group input { width: 100%; padding: 11px 14px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 8px; color: #f0f0f0; font-size: 14px; font-family: "Syne", sans-serif; outline: none; transition: border-color 0.2s; }
     .form-group input:focus { border-color: #7c3aed; }
-    .btn-submit { width: 100%; padding: 14px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px; transition: opacity 0.2s; }
+    .btn-submit { width: 100%; padding: 13px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 4px; transition: opacity 0.2s; }
     .btn-submit:hover { opacity: 0.85; }
-    .error-msg { color: #ff4466; font-size: 13px; margin-top: 8px; display: none; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    .error-msg { color: #ff4466; font-size: 13px; margin-top: 8px; }
   </style>
 </head>
 <body>
   <div class="logo">ZENTO</div>
+
   <div class="card">
+    <!-- Wallet connect -->
+    <div class="wallet-section">
+      <button class="btn-wallet" id="btnWallet" onclick="connectWallet()">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect width="22" height="22" rx="6" fill="#F6851B"/>
+          <path d="M17 5L12.3 8.5L13.2 6.1L17 5Z" fill="#E2761B"/>
+          <path d="M5 5L9.6 8.6L8.8 6.1L5 5Z" fill="#E4761B"/>
+        </svg>
+        Conectar MetaMask
+      </button>
+
+      <div class="wallet-badge" id="walletBadge">
+        <div class="wallet-dot"></div>
+        <span class="wallet-addr" id="walletAddr">—</span>
+        <span class="wallet-network">Monad Testnet</span>
+      </div>
+
+      <button class="btn-wallet-enter" id="btnEnterWithWallet" onclick="enterWithWallet()">
+        ⚡ Entrar con Wallet
+      </button>
+    </div>
+
+    <div class="divider">o con email</div>
+
+    <!-- Email login -->
     <div class="tabs">
       <button class="tab active" data-tab="login">Iniciar sesión</button>
       <button class="tab" data-tab="register">Registrarse</button>
@@ -68,8 +113,68 @@
   </div>
 
   <script>
-    // Redirect if already logged in
     if (localStorage.getItem("zento_user_id")) window.location.href = "lobby.html";
+
+    const MONAD = {
+      chainId: '0x279F',
+      chainName: 'Monad Testnet',
+      nativeCurrency: { name: 'Monad', symbol: 'MON', decimals: 18 },
+      rpcUrls: ['https://testnet-rpc.monad.xyz'],
+      blockExplorerUrls: ['https://testnet.monadexplorer.com'],
+    };
+
+    let connectedWallet = null;
+
+    async function connectWallet() {
+      const btn = document.getElementById('btnWallet');
+      if (!window.ethereum) {
+        alert('MetaMask no está instalado. Instálalo en metamask.io');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Conectando...';
+      try {
+        // Switch to Monad
+        try {
+          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: MONAD.chainId }] });
+        } catch (e) {
+          if (e.code === 4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [MONAD] });
+          else throw e;
+        }
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        connectedWallet = accounts[0];
+
+        // Show wallet badge
+        document.getElementById('walletAddr').textContent = connectedWallet.slice(0,6) + '...' + connectedWallet.slice(-4);
+        document.getElementById('walletBadge').classList.add('show');
+        document.getElementById('btnEnterWithWallet').classList.add('show');
+        btn.textContent = '✅ Wallet conectada';
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="6" fill="#F6851B"/><path d="M17 5L12.3 8.5L13.2 6.1L17 5Z" fill="#E2761B"/><path d="M5 5L9.6 8.6L8.8 6.1L5 5Z" fill="#E4761B"/></svg> Conectar MetaMask';
+        if (e.code !== 4001) alert('Error: ' + e.message);
+      }
+    }
+
+    async function enterWithWallet() {
+      if (!connectedWallet) return;
+      const userId = 'wallet-' + connectedWallet.toLowerCase();
+      const name = connectedWallet.slice(0,6) + '...' + connectedWallet.slice(-4);
+
+      // Registrar/actualizar usuario en el backend con la wallet
+      try {
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre: name, email: connectedWallet + '@wallet.eth', walletAddress: connectedWallet })
+        });
+      } catch(e) { /* continuar */ }
+
+      localStorage.setItem("zento_user_id", userId);
+      localStorage.setItem("zento_user_name", name);
+      localStorage.setItem("zento_wallet", connectedWallet);
+      window.location.href = "lobby.html";
+    }
 
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -81,13 +186,14 @@
       });
     });
 
-    // Login
+    // Email login
     document.getElementById('loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value;
       const userId = "user-" + Date.now();
       localStorage.setItem("zento_user_id", userId);
       localStorage.setItem("zento_user_name", email.split("@")[0]);
+      localStorage.removeItem("zento_wallet");
       window.location.href = "lobby.html";
     });
 
@@ -97,17 +203,16 @@
       const nombre = document.getElementById('regName').value;
       const email = document.getElementById('regEmail').value;
       const userId = "user-" + Date.now();
-
       try {
         await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre, email })
         });
-      } catch (err) { /* continue anyway */ }
-
+      } catch(e) {}
       localStorage.setItem("zento_user_id", userId);
       localStorage.setItem("zento_user_name", nombre);
+      localStorage.removeItem("zento_wallet");
       window.location.href = "lobby.html";
     });
   </script>
