@@ -3,139 +3,150 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zento - Sala</title>
+  <title>Zento — Sala</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; }
-    .container { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1e1e2e; }
+    .logo { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .back-link { color: #8888aa; font-size: 14px; text-decoration: none; transition: color 0.2s; }
+    .back-link:hover { color: #00ff88; }
 
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .header-left { display: flex; align-items: center; gap: 16px; }
-    .mini-logo { font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #836EF9, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .room-name { color: #fff; font-size: 1.3rem; font-weight: 700; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .code-badge { background: #1a1a25; border: 1px solid #836EF9; padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; color: #836EF9; font-weight: 700; letter-spacing: 2px; }
-    .live-chip { display: inline-flex; align-items: center; gap: 6px; background: #0a1a0f; border: 1px solid #00ff88; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #00ff88; font-weight: 700; }
-    .live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: blink 1s infinite; }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .main { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
 
-    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    @media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
+    .room-header { text-align: center; margin-bottom: 40px; }
+    .room-header h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    .room-code { font-family: monospace; font-size: 20px; color: #00ff88; letter-spacing: 4px; }
+    .live-chip { display: inline-block; margin-top: 12px; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; background: rgba(0,255,136,0.1); color: #00ff88; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #00ff88; margin-right: 6px; animation: blink 1s infinite; }
 
-    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; }
-    .pool-label { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-    .pool-amount { color: #836EF9; font-size: 2.4rem; font-weight: 800; margin: 8px 0; }
-    .yield-label { color: #888; font-size: 0.85rem; margin-top: 16px; text-transform: uppercase; letter-spacing: 1px; }
-    .yield-amount { color: #00ff88; font-size: 1.8rem; font-weight: 800; margin: 4px 0; }
-    .yield-sub { color: #666; font-size: 0.8rem; margin-top: 4px; }
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .panel { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 30px; }
+    .panel h2 { font-size: 14px; font-weight: 600; color: #8888aa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
 
-    .scoreboard h3 { color: #836EF9; font-size: 1rem; margin-bottom: 12px; }
-    .player-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e1e2e; }
-    .player-row:last-child { border-bottom: none; }
-    .pos { color: #836EF9; font-weight: 700; min-width: 30px; font-size: 0.95rem; }
-    .player-name { min-width: 100px; font-weight: 600; }
-    .player-name.leader { color: #00ff88; }
-    .player-score { color: #836EF9; font-weight: 700; min-width: 60px; text-align: right; }
-    .bar-container { flex: 1; height: 8px; background: #1a1a25; border-radius: 4px; }
-    .bar-fill { height: 100%; background: linear-gradient(90deg, #836EF9, #00ff88); border-radius: 4px; transition: width 0.3s; }
+    .big-number { font-family: monospace; font-size: 42px; font-weight: 700; color: #f0f0f0; margin-bottom: 8px; }
+    .big-number.green { color: #00ff88; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+    .small-note { font-size: 13px; color: #8888aa; margin-top: 4px; }
 
-    .footer-actions { display: flex; gap: 12px; align-items: center; }
-    .play-btn { flex: 1; display: block; padding: 18px; background: #836EF9; color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; cursor: pointer; text-align: center; text-decoration: none; transition: opacity 0.2s; }
-    .play-btn:hover { opacity: 0.85; }
-    .exit-btn { padding: 18px 24px; background: transparent; color: #ff4444; border: 1px solid #ff4444; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
-    .exit-btn:hover { background: #ff444415; }
+    .sb-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e1e2e; }
+    .sb-row:last-child { border-bottom: none; }
+    .sb-pos { width: 32px; font-size: 18px; text-align: center; }
+    .sb-name { flex: 1; font-size: 15px; font-weight: 600; }
+    .sb-name.leader { color: #00ff88; }
+    .sb-score { font-family: monospace; font-size: 15px; color: #00ff88; min-width: 60px; text-align: right; }
+    .sb-bar-wrap { flex: 2; height: 8px; background: #1e1e2e; border-radius: 4px; overflow: hidden; }
+    .sb-bar { height: 100%; background: linear-gradient(90deg, #00ff88, #7c3aed); border-radius: 4px; transition: width 0.5s; }
+    .sb-empty { color: #8888aa; font-size: 14px; text-align: center; padding: 20px 0; }
+
+    .room-footer { text-align: center; margin-top: 40px; }
+    .btn-play { display: inline-block; padding: 18px 48px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 800; font-size: 20px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; }
+    .btn-play:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.3); }
+    .room-estado { margin-top: 12px; font-size: 13px; color: #8888aa; }
+
+    @media (max-width: 768px) {
+      .panels { grid-template-columns: 1fr; }
+      .navbar { padding: 16px 20px; }
+      .big-number { font-size: 28px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="header-left">
-        <span class="mini-logo">ZENTO</span>
-        <span class="room-name" id="roomName">Cargando...</span>
-      </div>
-      <div class="header-right">
-        <span class="code-badge" id="roomCode">---</span>
-        <span class="live-chip"><span class="live-dot"></span> EN VIVO</span>
-      </div>
+  <nav class="navbar">
+    <div class="logo">ZENTO</div>
+    <a class="back-link" href="lobby.html">← Lobby</a>
+  </nav>
+
+  <div class="main">
+    <div class="room-header">
+      <h1 id="roomName">Cargando...</h1>
+      <div class="room-code" id="roomCode"></div>
+      <div class="live-chip"><span class="live-dot"></span>EN VIVO</div>
     </div>
 
     <div class="panels">
-      <!-- Pool stats -->
-      <div class="card">
-        <div class="pool-label">Pool Total (CETES)</div>
-        <div class="pool-amount" id="poolAmount">$0.00</div>
-        <div class="yield-label">Yield acumulado</div>
-        <div class="yield-amount" id="poolYield">+$0.0000</div>
-        <div class="yield-sub">~9% anual en CETES gubernamentales</div>
-        <div style="color:#666; font-size:0.8rem; margin-top:12px;" id="poolInfo">0 jugadores &middot; 0 días restantes</div>
+      <div class="panel">
+        <h2>Pool Total</h2>
+        <div class="big-number" id="poolTotal">$0 MXN</div>
+        <div style="margin-top: 30px;"></div>
+        <h2>Yield Acumulado</h2>
+        <div class="big-number green" id="yieldDisplay">$0.000000 MXN</div>
+        <div class="small-note">~9% APY en CETES gubernamentales</div>
       </div>
 
-      <!-- Scoreboard -->
-      <div class="card scoreboard">
-        <h3>Scoreboard</h3>
-        <div id="playerList"><p style="color:#666">Sin jugadores aún</p></div>
+      <div class="panel">
+        <h2>Tabla de Posiciones</h2>
+        <div id="scoreboard"><div class="sb-empty">Sin jugadores aún</div></div>
       </div>
     </div>
 
-    <div class="footer-actions">
-      <a class="play-btn" id="playBtn" href="#">🎮 JUGAR AHORA</a>
-      <a class="exit-btn" href="index.html">Salir de la sala</a>
+    <div class="room-footer">
+      <a class="btn-play" id="btnPlay" href="#">🎮 JUGAR AHORA</a>
+      <div class="room-estado" id="roomEstado"></div>
     </div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get('roomId');
-    const userId = params.get('userId') || 'user-001';
+    const roomId = params.get("roomId");
+    const userId = localStorage.getItem("zento_user_id") || params.get("userId");
+    if (!roomId) window.location.href = "lobby.html";
 
-    if (!roomId) { document.body.innerHTML = '<p style="color:#ff4444;padding:40px;text-align:center">No se proporcionó roomId</p>'; }
+    document.getElementById('btnPlay').href = 'trivia.html?roomId=' + roomId;
 
-    let roomData = null;
-    let localElapsed = 0;
+    let pool = 0;
+    let startTimeMs = null;
+
+    function renderScoreboard(players) {
+      const sb = document.getElementById('scoreboard');
+      if (!players || players.length === 0) {
+        sb.innerHTML = '<div class="sb-empty">Sin jugadores aún</div>';
+        return;
+      }
+      const sorted = [...players].sort((a, b) => b.score - a.score);
+      const maxScore = sorted[0].score || 1;
+      sb.innerHTML = sorted.map((p, i) => {
+        const pos = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+        const isLeader = i === 0 && p.score > 0;
+        const barW = maxScore > 0 ? (p.score / maxScore * 100) : 0;
+        return `<div class="sb-row">
+          <div class="sb-pos">${pos}</div>
+          <div class="sb-name ${isLeader ? 'leader' : ''}">${isLeader ? '👑 ' : ''}${p.nombre || p.userId}</div>
+          <div class="sb-bar-wrap"><div class="sb-bar" style="width:${barW}%"></div></div>
+          <div class="sb-score">${p.score} pts</div>
+        </div>`;
+      }).join('');
+    }
 
     async function fetchRoom() {
       try {
         const res = await fetch('/api/rooms/' + roomId);
-        roomData = await res.json();
-        document.getElementById('roomName').textContent = roomData.nombre;
-        document.getElementById('roomCode').textContent = roomData.id;
-        localElapsed = roomData.secondsElapsed || 0;
+        if (!res.ok) return;
+        const data = await res.json();
 
-        const pool = roomData.montoEntrada * roomData.jugadores.length;
-        document.getElementById('poolAmount').textContent = '$' + pool.toFixed(2);
+        document.getElementById('roomName').textContent = data.nombre;
+        document.getElementById('roomCode').textContent = data.id;
+        document.getElementById('roomEstado').textContent = 'Estado: ' + data.estado;
 
-        const days = Math.ceil((roomData.tiempoRestante || 0) / 86400);
-        document.getElementById('poolInfo').textContent = roomData.jugadores.length + ' jugadores · ' + days + ' días restantes';
+        pool = data.montoEntrada * (data.jugadores || []).length;
+        document.getElementById('poolTotal').textContent = '$' + pool.toFixed(0) + ' MXN';
 
-        const list = document.getElementById('playerList');
-        if (roomData.players && roomData.players.length > 0) {
-          const maxScore = Math.max(...roomData.players.map(p => p.score), 1);
-          list.innerHTML = roomData.players.map(p => {
-            const isLeader = p.posicion === 1 && p.score > 0;
-            return `<div class="player-row">
-              <span class="pos">${isLeader ? '👑' : '#' + p.posicion}</span>
-              <span class="player-name ${isLeader ? 'leader' : ''}">${p.nombre}</span>
-              <div class="bar-container"><div class="bar-fill" style="width:${(p.score/maxScore*100)}%"></div></div>
-              <span class="player-score">${p.score} pts</span>
-            </div>`;
-          }).join('');
+        if (data.startTime) {
+          startTimeMs = new Date(data.startTime).getTime();
         } else {
-          list.innerHTML = '<p style="color:#666">Sin jugadores aún</p>';
+          if (!startTimeMs) startTimeMs = Date.now();
         }
 
-        document.getElementById('playBtn').href = 'trivia.html?roomId=' + roomId + '&userId=' + userId;
-      } catch (e) {
-        console.error(e);
-      }
+        renderScoreboard(data.players);
+      } catch (e) { /* retry next interval */ }
     }
 
     function updateYield() {
-      if (!roomData) return;
-      localElapsed++;
-      const pool = roomData.montoEntrada * roomData.jugadores.length;
-      const y = pool * 0.09 * localElapsed / (365 * 24 * 3600);
-      document.getElementById('poolYield').textContent = '+$' + y.toFixed(4);
+      if (!startTimeMs) return;
+      const elapsed = (Date.now() - startTimeMs) / 1000;
+      const yieldVal = pool * 0.09 * elapsed / (365 * 24 * 3600);
+      document.getElementById('yieldDisplay').textContent = '$' + yieldVal.toFixed(6) + ' MXN';
     }
 
     fetchRoom();

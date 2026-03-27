@@ -3,188 +3,228 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zento - Trivia</title>
+  <title>Zento — Trivia</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .container { max-width: 600px; width: 100%; padding: 24px 20px; }
-    .progress-bar { width: 100%; height: 6px; background: #1a1a25; border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #836EF9, #00ff88); border-radius: 3px; transition: width 0.3s linear; }
-    .timer-bar { width: 100%; height: 6px; background: #1a1a25; border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
-    .timer-fill { height: 100%; border-radius: 3px; transition: width 1s linear, background 1s linear; }
-    .q-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; color: #888; }
-    .question { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 24px; line-height: 1.4; background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; }
-    .options { display: flex; flex-direction: column; gap: 10px; }
-    .option-btn { padding: 16px 20px; background: #12121a; border: 1px solid #2a2a3a; border-radius: 10px; color: #e0e0e0; font-family: 'Syne', sans-serif; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.2s; }
-    .option-btn:hover { border-color: #836EF9; background: #1a1a25; }
-    .option-btn.correct { background: #003322; border-color: #00ff88; color: #00ff88; }
-    .option-btn.wrong { background: #330011; border-color: #ff4444; color: #ff4444; }
-    .option-btn.disabled { pointer-events: none; opacity: 0.6; }
-    .score-display { text-align: center; color: #836EF9; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-    .result-screen { text-align: center; display: none; }
-    .result-screen.show { display: block; }
-    .result-emoji { font-size: 3rem; margin-bottom: 8px; }
-    .result-msg { color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
-    .result-score { color: #836EF9; font-size: 3.5rem; font-weight: 800; margin: 12px 0; }
-    .result-max { color: #666; font-size: 1rem; margin-bottom: 24px; }
-    .scoreboard-final { text-align: left; margin: 0 auto; max-width: 400px; }
-    .scoreboard-final h3 { color: #836EF9; margin-bottom: 12px; text-align: center; }
-    .scoreboard-final .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e1e2e; }
-    .scoreboard-final .row .name { color: #ccc; }
-    .scoreboard-final .row .pts { color: #00ff88; font-weight: 700; }
-    .back-btn { display: inline-block; margin-top: 24px; padding: 14px 32px; background: #836EF9; color: #fff; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none; }
-    .back-btn:hover { opacity: 0.85; }
-    .game-area { }
-    .game-area.hidden { display: none; }
+    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1e1e2e; }
+    .logo { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .back-link { color: #8888aa; font-size: 14px; text-decoration: none; transition: color 0.2s; }
+    .back-link:hover { color: #00ff88; }
+    .score-badge { font-family: monospace; font-size: 16px; color: #00ff88; background: rgba(0,255,136,0.1); padding: 6px 16px; border-radius: 20px; }
+
+    .main { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+
+    .q-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .q-num { font-size: 14px; color: #8888aa; font-weight: 600; }
+    .timer { font-family: monospace; font-size: 36px; font-weight: 700; }
+
+    .progress-bar { width: 100%; height: 6px; background: #1e1e2e; border-radius: 3px; margin-bottom: 30px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 1s linear, background-color 1s; }
+
+    .question-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px 30px; margin-bottom: 24px; text-align: center; }
+    .question-card h2 { font-size: 22px; font-weight: 700; line-height: 1.4; }
+
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .opt-btn { background: #12121a; border: 2px solid #1e1e2e; border-radius: 12px; padding: 18px 20px; color: #f0f0f0; font-family: "Syne", sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: left; }
+    .opt-btn:hover:not(:disabled) { border-color: #7c3aed; background: rgba(124,58,237,0.1); }
+    .opt-btn:disabled { cursor: default; opacity: 0.7; }
+    .opt-btn.correct { border-color: #00ff88; background: rgba(0,255,136,0.15); color: #00ff88; }
+    .opt-btn.wrong { border-color: #ff4466; background: rgba(255,68,102,0.15); color: #ff4466; }
+
+    .feedback { text-align: center; margin-top: 16px; font-size: 20px; font-weight: 700; min-height: 30px; }
+    .feedback.good { color: #00ff88; }
+    .feedback.bad { color: #ff4466; }
+
+    .results { display: none; text-align: center; }
+    .results h1 { font-size: 48px; margin-bottom: 8px; }
+    .results .score-final { font-family: monospace; font-size: 64px; color: #00ff88; text-shadow: 0 0 30px rgba(0,255,136,0.3); margin: 20px 0; }
+    .results .message { font-size: 20px; color: #8888aa; margin-bottom: 30px; }
+    .btn-back { display: inline-block; padding: 16px 40px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; text-decoration: none; transition: opacity 0.2s; }
+    .btn-back:hover { opacity: 0.85; }
+
+    .final-sb { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 24px; max-width: 500px; margin: 24px auto; text-align: left; }
+    .final-sb h3 { font-size: 14px; color: #8888aa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; text-align: center; }
+    .sb-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #1e1e2e; }
+    .sb-row:last-child { border-bottom: none; }
+    .sb-pos { width: 32px; font-size: 18px; text-align: center; }
+    .sb-name { flex: 1; font-size: 15px; font-weight: 600; }
+    .sb-name.leader { color: #00ff88; }
+    .sb-score { font-family: monospace; font-size: 15px; color: #00ff88; }
+
+    @media (max-width: 600px) {
+      .options { grid-template-columns: 1fr; }
+      .question-card h2 { font-size: 18px; }
+      .timer { font-size: 28px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <nav class="navbar">
+    <div class="logo">ZENTO</div>
+    <div class="score-badge" id="scoreBadge">🏆 0 pts</div>
+    <a class="back-link" id="backLink" href="#">← Sala</a>
+  </nav>
+
+  <div class="main">
     <div class="game-area" id="gameArea">
-      <div class="score-display" id="scoreDisplay">Puntos: 0</div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="q-header">
-        <span id="qNumber">Pregunta 1/10</span>
-        <span id="timerText">20s</span>
+      <div class="q-info">
+        <span class="q-num" id="qNum">Pregunta 1 / 10</span>
+        <span class="timer" id="timerNum">20</span>
       </div>
-      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%; background:#836EF9;"></div></div>
-      <div class="question" id="questionText"></div>
-      <div class="options" id="optionsContainer"></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:100%;background:#00ff88"></div></div>
+      <div class="question-card"><h2 id="qText">Cargando...</h2></div>
+      <div class="options" id="optionsGrid"></div>
+      <div class="feedback" id="feedback"></div>
     </div>
 
-    <div class="result-screen" id="resultScreen">
-      <div class="result-emoji" id="resultEmoji"></div>
-      <div class="result-msg" id="resultMsg"></div>
-      <div class="result-score" id="finalScore">0</div>
-      <div class="result-max">/ 1000 puntos máximos</div>
-      <div class="scoreboard-final">
-        <h3>Scoreboard</h3>
-        <div id="finalScoreboard"></div>
+    <div class="results" id="resultsArea">
+      <h1 id="resultEmoji">🏆</h1>
+      <div class="score-final" id="scoreFinal">0</div>
+      <div class="message" id="resultMsg">¡Buen trabajo!</div>
+      <div class="final-sb" id="finalSb" style="display:none">
+        <h3>Tabla de posiciones</h3>
+        <div id="finalSbRows"></div>
       </div>
-      <a class="back-btn" id="backBtn" href="#">Ver sala</a>
+      <a class="btn-back" id="btnBackRoom" href="#">Volver a la sala</a>
     </div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get('roomId');
-    const userId = params.get('userId') || 'user-001';
+    const roomId = params.get("roomId");
+    const userId = localStorage.getItem("zento_user_id") || params.get("userId");
+    if (!roomId || !userId) window.location.href = "lobby.html";
+
+    document.getElementById('backLink').href = 'room.html?roomId=' + roomId;
+    document.getElementById('btnBackRoom').href = 'room.html?roomId=' + roomId;
 
     const questions = [
-      { q: '¿Qué son los CETES?', opts: ['Certificados del Tesoro', 'Acciones del gobierno', 'Moneda digital del Banco de México', 'Bonos corporativos'], ans: 0 },
-      { q: '¿Cuál es la tasa aproximada de rendimiento de los CETES a 28 días actualmente?', opts: ['2%', '5%', '9-11%', '15%'], ans: 2 },
-      { q: '¿Qué es el on-ramp en cripto?', opts: ['Subir a una red', 'Convertir fiat a crypto', 'Minar tokens', 'Hacer staking'], ans: 1 },
-      { q: '¿Qué blockchain usa Zento para tokenizar CETES?', opts: ['Ethereum', 'Solana', 'Monad', 'Polygon'], ans: 2 },
-      { q: '¿Qué significa DeFi?', opts: ['Digital Finance', 'Decentralized Finance', 'Defined Finance', 'Direct Finance'], ans: 1 },
-      { q: '¿Qué es una stablecoin?', opts: ['Una moneda respaldada por oro', 'Una crypto de precio estable', 'Una acción tecnológica', 'Un bono del gobierno'], ans: 1 },
-      { q: '¿Qué es el yield en finanzas?', opts: ['El precio de compra', 'El rendimiento o ganancia generada', 'El costo de transacción', 'El volumen de mercado'], ans: 1 },
-      { q: '¿Qué es Etherfuse?', opts: ['Una wallet', 'Un exchange descentralizado', 'Infraestructura para tokenizar activos mexicanos', 'Un banco digital'], ans: 2 },
-      { q: '¿Qué es el APY?', opts: ['Annual Percentage Yield', 'Average Price Yesterday', 'Automated Payment System', 'Asset Protection Value'], ans: 0 },
-      { q: '¿Cuál es la ventaja principal de los CETES vs una cuenta de ahorro?', opts: ['Más liquidez', 'Sin riesgo de crédito del banco', 'Mayor rendimiento siempre', 'Sin impuestos'], ans: 1 }
+      { q: "¿Qué son los CETES?", opts: ["Certificados del Tesoro de los Estados Unidos Mexicanos","Acciones del gobierno mexicano","Moneda digital del Banco de México","Bonos corporativos de PEMEX"], correct: 0 },
+      { q: "¿Cuál es el rendimiento aproximado de CETES a 28 días?", opts: ["2% anual","5% anual","9-11% anual","20% anual"], correct: 2 },
+      { q: "¿Qué significa on-ramp en cripto?", opts: ["Subir a una red blockchain","Convertir dinero fiat a criptomonedas","Minar nuevos tokens","Hacer staking de tokens"], correct: 1 },
+      { q: "¿Qué blockchain usa Zento?", opts: ["Ethereum Mainnet","Solana","Monad Testnet","Polygon"], correct: 2 },
+      { q: "¿Qué significa DeFi?", opts: ["Digital Finance","Default Finance","Decentralized Finance","Defined Finance"], correct: 2 },
+      { q: "¿Qué es una stablecoin?", opts: ["Moneda respaldada por oro","Criptomoneda de precio estable","Acción tecnológica","Bono del gobierno"], correct: 1 },
+      { q: "¿Qué es el yield en finanzas?", opts: ["El precio de compra","El costo de transacción","El volumen de mercado","El rendimiento o ganancia generada"], correct: 3 },
+      { q: "¿Qué es Etherfuse?", opts: ["Una wallet de crypto","Un exchange descentralizado","Infraestructura para tokenizar activos mexicanos","Un banco digital"], correct: 2 },
+      { q: "¿Qué significa APY?", opts: ["Average Price Yesterday","Automated Payment System","Annual Percentage Yield","Asset Protection Value"], correct: 2 },
+      { q: "¿Cuál es la ventaja de CETES vs cuenta de ahorro bancaria?", opts: ["Mayor liquidez siempre","Sin riesgo de crédito bancario","Mayor rendimiento garantizado","Sin impuestos"], correct: 1 }
     ];
 
-    let current = 0;
-    let score = 0;
-    let timeLeft = 20;
-    let timer = null;
+    let currentQ = 0, totalScore = 0, timeLeft = 20, timer = null;
 
-    function getTimerColor(t) {
-      if (t > 10) return '#836EF9';
-      if (t > 5) return '#ff8800';
-      return '#ff4444';
-    }
+    function showQuestion(index) {
+      const q = questions[index];
+      document.getElementById('qNum').textContent = 'Pregunta ' + (index + 1) + ' / 10';
+      document.getElementById('qText').textContent = q.q;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').className = 'feedback';
 
-    function renderQuestion() {
-      if (current >= questions.length) { endGame(); return; }
-      const q = questions[current];
-      document.getElementById('qNumber').textContent = `Pregunta ${current + 1}/10`;
-      document.getElementById('progressFill').style.width = ((current) / 10 * 100) + '%';
-      document.getElementById('questionText').textContent = q.q;
-      document.getElementById('scoreDisplay').textContent = 'Puntos: ' + score;
-
-      const container = document.getElementById('optionsContainer');
-      container.innerHTML = q.opts.map((o, i) =>
-        `<button class="option-btn" data-idx="${i}">${o}</button>`
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = q.opts.map((opt, i) =>
+        `<button class="opt-btn" onclick="answer(${i})">${opt}</button>`
       ).join('');
 
-      container.querySelectorAll('.option-btn').forEach(btn => {
-        btn.addEventListener('click', () => handleAnswer(Number(btn.dataset.idx)));
-      });
-
       timeLeft = 20;
-      document.getElementById('timerText').textContent = '20s';
-      const timerFill = document.getElementById('timerFill');
-      timerFill.style.width = '100%';
-      timerFill.style.background = '#836EF9';
+      document.getElementById('timerNum').textContent = '20';
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressBar').style.background = '#00ff88';
 
-      clearInterval(timer);
       timer = setInterval(() => {
         timeLeft--;
-        document.getElementById('timerText').textContent = timeLeft + 's';
-        timerFill.style.width = (timeLeft / 20 * 100) + '%';
-        timerFill.style.background = getTimerColor(timeLeft);
+        document.getElementById('timerNum').textContent = timeLeft;
+        const pct = (timeLeft / 20) * 100;
+        document.getElementById('progressBar').style.width = pct + '%';
+        if (pct > 50) document.getElementById('progressBar').style.background = '#00ff88';
+        else if (pct > 25) document.getElementById('progressBar').style.background = '#ffaa00';
+        else document.getElementById('progressBar').style.background = '#ff4466';
+
         if (timeLeft <= 0) {
           clearInterval(timer);
-          handleAnswer(-1);
+          const btns = document.querySelectorAll('.opt-btn');
+          btns.forEach((b, i) => { b.disabled = true; if (i === q.correct) b.classList.add('correct'); });
+          document.getElementById('feedback').textContent = '⏱ Tiempo agotado';
+          document.getElementById('feedback').className = 'feedback bad';
+          setTimeout(nextQuestion, 1500);
         }
       }, 1000);
     }
 
-    function handleAnswer(idx) {
+    window.answer = function(optionIndex) {
       clearInterval(timer);
-      const q = questions[current];
-      const btns = document.querySelectorAll('.option-btn');
-      btns.forEach(b => b.classList.add('disabled'));
+      const q = questions[currentQ];
+      const btns = document.querySelectorAll('.opt-btn');
+      btns.forEach(b => b.disabled = true);
 
-      btns[q.ans].classList.add('correct');
-      if (idx === q.ans) {
-        score += Math.round((timeLeft / 20) * 100);
-      } else if (idx >= 0) {
-        btns[idx].classList.add('wrong');
+      if (optionIndex === q.correct) {
+        const pts = Math.round((timeLeft / 20) * 100);
+        totalScore += pts;
+        btns[optionIndex].classList.add('correct');
+        document.getElementById('feedback').textContent = '+' + pts + ' pts';
+        document.getElementById('feedback').className = 'feedback good';
+      } else {
+        btns[optionIndex].classList.add('wrong');
+        btns[q.correct].classList.add('correct');
+        document.getElementById('feedback').textContent = '✗';
+        document.getElementById('feedback').className = 'feedback bad';
       }
+      document.getElementById('scoreBadge').textContent = '🏆 ' + totalScore + ' pts';
+      setTimeout(nextQuestion, 1500);
+    };
 
-      document.getElementById('scoreDisplay').textContent = 'Puntos: ' + score;
-      setTimeout(() => { current++; renderQuestion(); }, 1500);
+    function nextQuestion() {
+      currentQ++;
+      if (currentQ < 10) {
+        showQuestion(currentQ);
+      } else {
+        showResults();
+      }
     }
 
-    async function endGame() {
-      clearInterval(timer);
-      document.getElementById('gameArea').classList.add('hidden');
-      const rs = document.getElementById('resultScreen');
-      rs.classList.add('show');
-      document.getElementById('finalScore').textContent = score;
-      document.getElementById('backBtn').href = 'room.html?roomId=' + roomId + '&userId=' + userId;
+    async function showResults() {
+      document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('resultsArea').style.display = 'block';
 
-      if (score >= 800) {
+      document.getElementById('scoreFinal').textContent = totalScore;
+
+      if (totalScore >= 800) {
         document.getElementById('resultEmoji').textContent = '🏆';
-        document.getElementById('resultMsg').textContent = '¡Eres un genio financiero!';
-      } else if (score >= 500) {
+        document.getElementById('resultMsg').textContent = '¡Genio financiero!';
+      } else if (totalScore >= 500) {
         document.getElementById('resultEmoji').textContent = '💡';
-        document.getElementById('resultMsg').textContent = '¡Nada mal!';
+        document.getElementById('resultMsg').textContent = '¡Buen trabajo!';
       } else {
         document.getElementById('resultEmoji').textContent = '📚';
-        document.getElementById('resultMsg').textContent = 'A estudiar más...';
+        document.getElementById('resultMsg').textContent = 'Sigue estudiando';
       }
 
       try {
         const res = await fetch('/api/rooms/' + roomId + '/score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, puntos: score })
+          body: JSON.stringify({ userId, puntos: totalScore, juegoId: 'trivia' })
         });
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          document.getElementById('finalScoreboard').innerHTML = data.map(p =>
-            `<div class="row"><span class="name">#${p.posicion} ${p.nombre}</span><span class="pts">${p.score} pts</span></div>`
-          ).join('');
+        if (res.ok) {
+          const scoreboard = await res.json();
+          if (Array.isArray(scoreboard) && scoreboard.length > 0) {
+            document.getElementById('finalSb').style.display = 'block';
+            document.getElementById('finalSbRows').innerHTML = scoreboard.map((p, i) => {
+              const pos = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+              const isLeader = i === 0;
+              return `<div class="sb-row">
+                <div class="sb-pos">${pos}</div>
+                <div class="sb-name ${isLeader ? 'leader' : ''}">${isLeader ? '👑 ' : ''}${p.nombre || p.userId}</div>
+                <div class="sb-score">${p.score} pts</div>
+              </div>`;
+            }).join('');
+          }
         }
-      } catch (e) {
-        console.error('Error posting score:', e);
-      }
+      } catch (e) { /* score submit failed, continue */ }
     }
 
-    renderQuestion();
+    showQuestion(0);
   </script>
 </body>
 </html>

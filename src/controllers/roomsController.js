@@ -8,6 +8,16 @@ function generateRoomCode() {
   return code;
 }
 
+async function listRooms(req, res) {
+  try {
+    const rooms = db.getAllRooms();
+    return res.json(rooms);
+  } catch (err) {
+    console.error('[rooms] list error:', err.message);
+    return res.status(500).json({ error: err.message });
+  }
+}
+
 async function createRoom(req, res) {
   try {
     const { nombre, juego, montoEntrada, diasDuracion, creadorId } = req.body;
@@ -145,11 +155,12 @@ async function updateScore(req, res) {
   try {
     const room = db.getRoomById(req.params.roomId);
     if (!room) return res.status(404).json({ error: 'Sala no encontrada' });
-    if (room.estado !== 'playing') return res.status(400).json({ error: 'La sala no está en juego' });
-
     const { userId, puntos } = req.body;
-    const player = db.getPlayerInRoom(userId, room.id);
-    if (!player) return res.status(404).json({ error: 'Jugador no encontrado en la sala' });
+    let player = db.getPlayerInRoom(userId, room.id);
+    if (!player) {
+      db.addPlayerToRoom(userId, room.id, 0);
+      player = db.getPlayerInRoom(userId, room.id);
+    }
 
     db.updateScore(userId, room.id, puntos);
 
@@ -169,4 +180,4 @@ async function updateScore(req, res) {
   }
 }
 
-module.exports = { createRoom, getRoom, joinRoom, closeRoom, updateScore };
+module.exports = { listRooms, createRoom, getRoom, joinRoom, closeRoom, updateScore };

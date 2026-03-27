@@ -3,239 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zento</title>
+  <title>Zento — Juega. Compite. Gana el Rendimiento.</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; }
-    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; }
+    a { color: #00ff88; text-decoration: none; }
 
-    /* Hero */
-    .hero { text-align: center; padding: 60px 0 40px; }
-    .logo { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, #836EF9, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .tagline { font-size: 1.3rem; color: #fff; margin-top: 12px; font-weight: 600; }
-    .hero-sub { color: #888; font-size: 0.95rem; margin-top: 8px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5; }
-    .hero-btns { display: flex; gap: 16px; justify-content: center; margin-top: 28px; }
-    .btn-primary { padding: 14px 32px; background: #836EF9; color: #fff; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    .btn-primary:hover { opacity: 0.85; }
-    .btn-outline { padding: 14px 32px; background: transparent; color: #00ff88; border: 2px solid #00ff88; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-    .btn-outline:hover { background: #00ff8815; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1e1e2e; }
+    .logo { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .btn-enter { background: #00ff88; color: #0a0a0f; border: none; padding: 10px 24px; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+    .btn-enter:hover { opacity: 0.85; }
 
-    /* How it works */
-    .section-title { color: #fff; font-size: 1.5rem; text-align: center; margin: 48px 0 24px; font-weight: 700; }
-    .how-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px; }
-    .how-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; text-align: center; }
-    .how-card .icon { font-size: 2rem; margin-bottom: 8px; }
-    .how-card h3 { color: #836EF9; font-size: 1rem; margin-bottom: 8px; }
-    .how-card p { color: #888; font-size: 0.85rem; line-height: 1.4; }
+    .hero { text-align: center; padding: 100px 20px 60px; max-width: 800px; margin: 0 auto; }
+    .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.15; margin-bottom: 20px; }
+    .hero p { font-size: 18px; color: #8888aa; margin-bottom: 40px; line-height: 1.6; }
+    .yield-counter { font-family: monospace; font-size: 56px; color: #00ff88; margin-bottom: 40px; text-shadow: 0 0 30px rgba(0,255,136,0.3); }
+    .btn-cta { background: linear-gradient(135deg, #00ff88, #00cc6a); color: #0a0a0f; border: none; padding: 16px 40px; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 18px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.3); }
 
-    /* Cards */
-    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-    .card h2 { color: #836EF9; font-size: 1.3rem; margin-bottom: 16px; }
-    label { display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 4px; margin-top: 12px; }
-    input, select { width: 100%; padding: 10px 14px; background: #1a1a25; border: 1px solid #2a2a3a; border-radius: 8px; color: #fff; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; }
-    input:focus, select:focus { border-color: #836EF9; }
-    .btn-create { width: 100%; padding: 12px; margin-top: 16px; background: #836EF9; color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    .btn-create:hover { opacity: 0.85; }
-    .btn-search { width: 100%; padding: 12px; margin-top: 16px; background: transparent; color: #00ff88; border: 2px solid #00ff88; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-    .btn-search:hover { background: #00ff8815; }
-    .result { margin-top: 16px; padding: 14px; background: #1a1a25; border-radius: 8px; display: none; }
-    .result.show { display: block; }
-    .result .code { color: #836EF9; font-size: 1.8rem; font-weight: 800; text-align: center; letter-spacing: 4px; cursor: pointer; }
-    .result .code:hover { opacity: 0.7; }
-    .result .link { color: #888; font-size: 0.8rem; text-align: center; word-break: break-all; margin-top: 8px; }
-    .result .copy-hint { color: #666; font-size: 0.75rem; text-align: center; margin-top: 4px; }
-    .room-info { display: none; margin-top: 16px; }
-    .room-info.show { display: block; }
-    .room-info-card { background: #1a1a25; border: 1px solid #2a2a3a; border-radius: 10px; padding: 16px; }
-    .room-info h3 { color: #836EF9; margin-bottom: 8px; }
-    .room-info p { margin: 4px 0; color: #ccc; font-size: 0.9rem; }
-    .room-info .yield-live { color: #00ff88; font-weight: 700; }
-    .btn-join { width: 100%; padding: 12px; margin-top: 12px; background: #836EF9; color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; }
-    .btn-join:hover { opacity: 0.85; }
-    .error { color: #ff4444; font-size: 0.85rem; margin-top: 8px; }
+    .steps-section { padding: 80px 40px; max-width: 1000px; margin: 0 auto; }
+    .steps-section h2 { text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 50px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .step { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px 30px; text-align: center; transition: border-color 0.3s; }
+    .step:hover { border-color: #7c3aed; }
+    .step-icon { font-size: 48px; margin-bottom: 16px; }
+    .step h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #00ff88; }
+    .step p { font-size: 14px; color: #8888aa; line-height: 1.6; }
 
-    /* Modal */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #12121a; border: 1px solid #836EF9; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; text-align: center; }
-    .modal h2 { color: #00ff88; margin-bottom: 8px; }
-    .modal .modal-code { color: #836EF9; font-size: 2.5rem; font-weight: 800; letter-spacing: 6px; margin: 16px 0; cursor: pointer; }
-    .modal .modal-link { color: #888; font-size: 0.8rem; word-break: break-all; }
-    .modal .modal-hint { color: #666; font-size: 0.75rem; margin-top: 8px; }
-    .modal button { margin-top: 20px; padding: 12px 28px; background: #836EF9; color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+    .footer { text-align: center; padding: 40px 20px; color: #8888aa; font-size: 13px; border-top: 1px solid #1e1e2e; margin-top: 60px; }
 
-    .join-user-input { margin-top: 12px; }
-
-    @media (max-width: 700px) {
-      .how-cards { grid-template-columns: repeat(2, 1fr); }
-      .logo { font-size: 3rem; }
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .yield-counter { font-size: 36px; }
+      .steps { grid-template-columns: 1fr; }
+      .navbar { padding: 16px 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Hero -->
-    <div class="hero">
-      <div class="logo">ZENTO</div>
-      <div class="tagline">Reta a tus amigos. El que más sabe se lleva el rendimiento.</div>
-      <p class="hero-sub">Deposita MXN, compite en trivia, el ganador se lleva el yield de todos. Tu capital siempre regresa.</p>
-      <div class="hero-btns">
-        <button class="btn-primary" onclick="document.getElementById('createSection').scrollIntoView({behavior:'smooth'})">Crear sala</button>
-        <button class="btn-outline" onclick="document.getElementById('joinSection').scrollIntoView({behavior:'smooth'})">Unirse a sala</button>
-      </div>
-    </div>
+  <nav class="navbar">
+    <div class="logo">ZENTO</div>
+    <a href="login.html"><button class="btn-enter">Entrar</button></a>
+  </nav>
 
-    <!-- How it works -->
-    <h2 class="section-title">¿Cómo funciona?</h2>
-    <div class="how-cards">
-      <div class="how-card">
-        <div class="icon">💰</div>
+  <section class="hero">
+    <h1>Juega. Compite. <span style="color:#00ff88">Gana el Rendimiento.</span></h1>
+    <p>Reta a tus amigos con CETES como colateral. El que más sabe se lleva el yield de todos.</p>
+    <div class="yield-counter" id="yieldCounter">$0.00 MXN</div>
+    <a href="login.html"><button class="btn-cta">Empezar a jugar</button></a>
+  </section>
+
+  <section class="steps-section">
+    <h2>¿Cómo funciona?</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">💰</div>
         <h3>Deposita</h3>
-        <p>Cada jugador deposita MXN. Se convierte automáticamente a CETES.</p>
+        <p>Cada jugador deposita MXN. Se convierte en CETES automáticamente.</p>
       </div>
-      <div class="how-card">
-        <div class="icon">🎮</div>
+      <div class="step">
+        <div class="step-icon">🎮</div>
         <h3>Compite</h3>
-        <p>Juega trivia de finanzas y cultura. 10 preguntas, 20 segundos cada una.</p>
+        <p>Juega trivia financiera. 10 preguntas, 20 segundos cada una.</p>
       </div>
-      <div class="how-card">
-        <div class="icon">📈</div>
-        <h3>El pool rinde</h3>
-        <p>Mientras juegan, los CETES generan rendimiento (~9% anual).</p>
-      </div>
-      <div class="how-card">
-        <div class="icon">🏆</div>
-        <h3>Ganador lleva el yield</h3>
-        <p>El de mayor score se lleva el yield. Todos recuperan su depósito.</p>
+      <div class="step">
+        <div class="step-icon">🏆</div>
+        <h3>Gana el yield</h3>
+        <p>El de mayor score se lleva el rendimiento de todos. Tu capital siempre regresa.</p>
       </div>
     </div>
+  </section>
 
-    <!-- Create Room -->
-    <div class="card" id="createSection">
-      <h2>Crear sala</h2>
-      <label>Nombre de la sala</label>
-      <input type="text" id="roomName" placeholder="Ej: Trivia Nocturna">
-      <label>Tipo de juego</label>
-      <select id="roomGame">
-        <option value="Trivia Financiera">Trivia Financiera</option>
-        <option value="Cultura General">Cultura General</option>
-        <option value="Mixto">Mixto</option>
-      </select>
-      <label>Monto de entrada (MXN)</label>
-      <input type="number" id="roomAmount" placeholder="100" min="1">
-      <label>Duración (días)</label>
-      <input type="number" id="roomDays" placeholder="7" min="1">
-      <button class="btn-create" id="createBtn">Crear sala</button>
-      <div class="error" id="createError"></div>
-    </div>
-
-    <!-- Join Room -->
-    <div class="card" id="joinSection">
-      <h2>Unirse a sala</h2>
-      <label>Código de sala</label>
-      <input type="text" id="joinCode" placeholder="Ej: ABC123" maxlength="6" style="text-transform: uppercase; font-size: 1.3rem; text-align: center; letter-spacing: 4px;">
-      <button class="btn-search" id="lookupBtn">Buscar sala</button>
-      <div class="error" id="joinError"></div>
-      <div class="room-info" id="roomInfo">
-        <div class="room-info-card">
-          <h3 id="infoName"></h3>
-          <p>Juego: <span id="infoGame"></span></p>
-          <p>Entrada: $<span id="infoAmount"></span> MXN</p>
-          <p>Jugadores: <span id="infoPlayers"></span></p>
-          <p>Yield acumulado: <span class="yield-live" id="infoYield">$0.00</span></p>
-          <p>Estado: <span id="infoStatus"></span></p>
-          <div class="join-user-input">
-            <label>Tu userId</label>
-            <input type="text" id="joinUserId" placeholder="Ej: user-001" value="user-001">
-          </div>
-          <button class="btn-join" id="joinBtn">Unirse</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <h2>¡Sala creada!</h2>
-      <p style="color:#888">Comparte este código con tus amigos:</p>
-      <div class="modal-code" id="modalCode" onclick="navigator.clipboard.writeText(this.textContent)"></div>
-      <div class="modal-hint">Click para copiar</div>
-      <div class="modal-link" id="modalLink"></div>
-      <button onclick="document.getElementById('modalOverlay').classList.remove('show')">Cerrar</button>
-    </div>
-  </div>
+  <footer class="footer">Zento © 2025 — Construido sobre Monad Testnet con Etherfuse</footer>
 
   <script>
-    const API = '';
-
-    document.getElementById('createBtn').addEventListener('click', async () => {
-      const err = document.getElementById('createError');
-      err.textContent = '';
-      const body = {
-        nombre: document.getElementById('roomName').value,
-        juego: document.getElementById('roomGame').value,
-        montoEntrada: Number(document.getElementById('roomAmount').value),
-        diasDuracion: Number(document.getElementById('roomDays').value),
-        creadorId: 'user-001'
-      };
-      if (!body.nombre || !body.montoEntrada || !body.diasDuracion) {
-        err.textContent = 'Completa todos los campos';
-        return;
-      }
-      try {
-        const res = await fetch(API + '/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        document.getElementById('modalCode').textContent = data.id;
-        document.getElementById('modalLink').textContent = window.location.origin + '/room.html?roomId=' + data.id + '&userId=user-001';
-        document.getElementById('modalOverlay').classList.add('show');
-      } catch (e) {
-        err.textContent = e.message;
-      }
-    });
-
-    let currentRoom = null;
-    document.getElementById('lookupBtn').addEventListener('click', async () => {
-      const err = document.getElementById('joinError');
-      err.textContent = '';
-      const code = document.getElementById('joinCode').value.toUpperCase().trim();
-      if (!code) { err.textContent = 'Ingresa un código'; return; }
-      try {
-        const res = await fetch(API + '/api/rooms/' + code);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        currentRoom = data;
-        document.getElementById('infoName').textContent = data.nombre;
-        document.getElementById('infoGame').textContent = data.juego;
-        document.getElementById('infoAmount').textContent = data.montoEntrada;
-        document.getElementById('infoPlayers').textContent = data.jugadores.length;
-        document.getElementById('infoYield').textContent = '$' + (data.yieldGenerated || 0).toFixed(2);
-        document.getElementById('infoStatus').textContent = data.estado;
-        document.getElementById('roomInfo').classList.add('show');
-      } catch (e) {
-        err.textContent = e.message;
-        document.getElementById('roomInfo').classList.remove('show');
-      }
-    });
-
-    document.getElementById('joinBtn').addEventListener('click', async () => {
-      if (!currentRoom) return;
-      const err = document.getElementById('joinError');
-      const userId = document.getElementById('joinUserId').value.trim() || 'user-001';
-      try {
-        const res = await fetch(API + '/api/rooms/' + currentRoom.id + '/join', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        window.location.href = 'room.html?roomId=' + currentRoom.id + '&userId=' + userId;
-      } catch (e) {
-        err.textContent = e.message;
-      }
-    });
+    let yieldVal = 0;
+    setInterval(() => {
+      yieldVal += 0.003;
+      document.getElementById('yieldCounter').textContent = '$' + yieldVal.toFixed(2) + ' MXN';
+    }, 1000);
   </script>
 </body>
 </html>

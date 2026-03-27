@@ -13,8 +13,9 @@ app.use('/api/onboarding', require('./src/routes/onboarding'));
 app.use('/api/deposit', require('./src/routes/deposit'));
 app.use('/api/webhook', require('./src/routes/webhook'));
 app.use('/api/rooms', require('./src/routes/rooms'));
+app.use('/api/users', require('./src/routes/users'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`YieldBet server running on port ${PORT}`);
+  console.log(`Zento server running on port ${PORT}`);
 });

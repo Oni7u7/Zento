@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zento — Lobby</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1e1e2e; }
+    .logo { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-right span { color: #8888aa; font-size: 14px; }
+    .btn-logout { background: none; border: 1px solid #1e1e2e; color: #f0f0f0; padding: 8px 16px; border-radius: 8px; font-family: "Syne", sans-serif; font-size: 13px; cursor: pointer; transition: border-color 0.2s; }
+    .btn-logout:hover { border-color: #7c3aed; }
+
+    .main { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .panel { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 30px; }
+    .panel h2 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: #8888aa; margin-bottom: 6px; }
+    .form-group input, .form-group select { width: 100%; padding: 12px 16px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 8px; color: #f0f0f0; font-size: 14px; font-family: "Syne", sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color: #7c3aed; }
+    .form-group select option { background: #0a0a0f; }
+
+    .btn-primary { width: 100%; padding: 14px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { width: 100%; padding: 12px; background: #7c3aed; color: #f0f0f0; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px; transition: opacity 0.2s; }
+    .btn-secondary:hover { opacity: 0.85; }
+
+    .input-big { font-size: 24px !important; text-align: center; letter-spacing: 6px; font-family: monospace !important; text-transform: uppercase; }
+
+    /* Room info card */
+    .room-info { background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; margin-top: 16px; display: none; }
+    .room-info h3 { font-size: 16px; margin-bottom: 8px; }
+    .room-info .detail { display: flex; justify-content: space-between; font-size: 13px; color: #8888aa; padding: 4px 0; }
+    .room-info .detail span:last-child { color: #f0f0f0; }
+    .room-info .players-list { margin-top: 10px; font-size: 13px; color: #8888aa; }
+    .room-info .btn-join { margin-top: 12px; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; text-align: center; max-width: 420px; width: 90%; }
+    .modal h2 { font-size: 24px; margin-bottom: 16px; }
+    .room-code-display { font-family: monospace; font-size: 48px; color: #00ff88; letter-spacing: 8px; margin: 20px 0; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+    .btn-copy { background: none; border: 1px solid #1e1e2e; color: #8888aa; padding: 10px 20px; border-radius: 8px; font-family: "Syne", sans-serif; font-size: 13px; cursor: pointer; margin-right: 8px; transition: all 0.2s; }
+    .btn-copy:hover { border-color: #00ff88; color: #00ff88; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+
+    .msg { padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 12px; display: none; }
+    .msg.error { display: block; background: rgba(255,68,102,0.1); color: #ff4466; border: 1px solid rgba(255,68,102,0.2); }
+    .msg.success { display: block; background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); }
+
+    /* Active rooms */
+    .rooms-section { margin-top: 30px; }
+    .rooms-section h2 { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+    .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .room-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; transition: border-color 0.3s; cursor: pointer; }
+    .room-card:hover { border-color: #7c3aed; }
+    .room-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .room-card .meta { font-size: 12px; color: #8888aa; }
+    .room-card .code { font-family: monospace; color: #00ff88; font-size: 13px; }
+    .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .chip-waiting { background: rgba(0,255,136,0.1); color: #00ff88; }
+    .chip-playing { background: rgba(124,58,237,0.1); color: #7c3aed; }
+    .chip-finished { background: rgba(136,136,170,0.1); color: #8888aa; }
+
+    @media (max-width: 768px) {
+      .columns { grid-template-columns: 1fr; }
+      .navbar { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">ZENTO</div>
+    <div class="nav-right">
+      <span>Hola, <strong id="userName"></strong></span>
+      <button class="btn-logout" id="btnLogout">Salir</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="columns">
+      <!-- Create Room -->
+      <div class="panel">
+        <h2>Nueva sala</h2>
+        <form id="createForm">
+          <div class="form-group">
+            <label>Nombre de la sala</label>
+            <input type="text" id="roomName" placeholder="Trivia del viernes..." required>
+          </div>
+          <div class="form-group">
+            <label>Tipo de juego</label>
+            <select id="roomGame" required>
+              <option value="Trivia Financiera">Trivia Financiera</option>
+              <option value="Cultura General">Cultura General</option>
+              <option value="Mixto">Mixto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monto de entrada (MXN)</label>
+            <input type="number" id="roomAmount" min="10" step="10" value="100" required>
+          </div>
+          <div class="form-group">
+            <label>Duración (días)</label>
+            <input type="number" id="roomDays" min="1" max="30" value="7" required>
+          </div>
+          <button type="submit" class="btn-primary">Crear sala →</button>
+          <div class="msg" id="createMsg"></div>
+        </form>
+      </div>
+
+      <!-- Join Room -->
+      <div class="panel">
+        <h2>Unirse a sala</h2>
+        <div class="form-group">
+          <label>Código de sala</label>
+          <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6">
+        </div>
+        <button class="btn-primary" id="btnSearch">Buscar</button>
+        <div class="msg" id="joinMsg"></div>
+        <div class="room-info" id="roomInfo">
+          <h3 id="riName"></h3>
+          <div class="detail"><span>Juego</span><span id="riGame"></span></div>
+          <div class="detail"><span>Entrada</span><span id="riAmount"></span></div>
+          <div class="detail"><span>Estado</span><span id="riStatus"></span></div>
+          <div class="detail"><span>Jugadores</span><span id="riPlayers"></span></div>
+          <div class="detail"><span>Yield acumulado</span><span id="riYield"></span></div>
+          <button class="btn-secondary btn-join" id="btnJoin">Unirse →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active rooms -->
+    <div class="rooms-section">
+      <h2>Salas activas</h2>
+      <div class="rooms-grid" id="roomsGrid"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2>¡Sala creada!</h2>
+      <div class="room-code-display" id="modalCode"></div>
+      <div class="modal-actions">
+        <button class="btn-copy" id="btnCopy">Copiar link</button>
+        <button class="btn-primary" id="btnGoRoom" style="width:auto; padding: 12px 24px;">Ir a la sala →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auth guard
+    if (!localStorage.getItem("zento_user_id")) window.location.href = "login.html";
+
+    const userId = localStorage.getItem("zento_user_id");
+    const userName = localStorage.getItem("zento_user_name");
+    document.getElementById('userName').textContent = userName;
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      localStorage.removeItem("zento_user_id");
+      localStorage.removeItem("zento_user_name");
+      window.location.href = "login.html";
+    });
+
+    let createdRoomId = null;
+    let foundRoom = null;
+
+    // Create room
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msgEl = document.getElementById('createMsg');
+      msgEl.className = 'msg'; msgEl.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/rooms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: document.getElementById('roomName').value,
+            juego: document.getElementById('roomGame').value,
+            montoEntrada: parseFloat(document.getElementById('roomAmount').value),
+            diasDuracion: parseInt(document.getElementById('roomDays').value),
+            creadorId: userId
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al crear sala');
+
+        createdRoomId = data.id;
+        document.getElementById('modalCode').textContent = data.id;
+        document.getElementById('modal').classList.add('show');
+      } catch (err) {
+        msgEl.textContent = err.message;
+        msgEl.className = 'msg error';
+      }
+    });
+
+    // Modal actions
+    document.getElementById('btnCopy').addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.origin + '/room.html?roomId=' + createdRoomId);
+      document.getElementById('btnCopy').textContent = '¡Copiado!';
+      setTimeout(() => document.getElementById('btnCopy').textContent = 'Copiar link', 2000);
+    });
+    document.getElementById('btnGoRoom').addEventListener('click', () => {
+      window.location.href = 'room.html?roomId=' + createdRoomId + '&userId=' + userId;
+    });
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('show');
+    });
+
+    // Search room
+    document.getElementById('btnSearch').addEventListener('click', async () => {
+      const code = document.getElementById('joinCode').value.trim().toUpperCase();
+      const msgEl = document.getElementById('joinMsg');
+      const infoEl = document.getElementById('roomInfo');
+      msgEl.className = 'msg'; msgEl.style.display = 'none';
+      infoEl.style.display = 'none';
+
+      if (!code) return;
+      try {
+        const res = await fetch('/api/rooms/' + code);
+        if (!res.ok) throw new Error('Sala no encontrada');
+        foundRoom = await res.json();
+
+        document.getElementById('riName').textContent = foundRoom.nombre;
+        document.getElementById('riGame').textContent = foundRoom.juego;
+        document.getElementById('riAmount').textContent = '$' + foundRoom.montoEntrada + ' MXN';
+        document.getElementById('riStatus').textContent = foundRoom.estado;
+        document.getElementById('riPlayers').textContent = (foundRoom.players || foundRoom.jugadores || []).length + ' jugadores';
+        document.getElementById('riYield').textContent = '$' + (foundRoom.yieldGenerated || 0).toFixed(2) + ' MXN';
+        infoEl.style.display = 'block';
+      } catch (err) {
+        msgEl.textContent = 'Sala no encontrada';
+        msgEl.className = 'msg error';
+      }
+    });
+
+    // Join room
+    document.getElementById('btnJoin').addEventListener('click', async () => {
+      if (!foundRoom) return;
+      const msgEl = document.getElementById('joinMsg');
+      try {
+        const res = await fetch('/api/rooms/' + foundRoom.id + '/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Error al unirse');
+        }
+        window.location.href = 'room.html?roomId=' + foundRoom.id + '&userId=' + userId;
+      } catch (err) {
+        msgEl.textContent = err.message;
+        msgEl.className = 'msg error';
+      }
+    });
+
+    // Load active rooms
+    async function loadRooms() {
+      try {
+        const res = await fetch('/api/rooms');
+        if (!res.ok) return;
+        const rooms = await res.json();
+        const grid = document.getElementById('roomsGrid');
+        grid.innerHTML = rooms.map(r => {
+          const chipClass = r.estado === 'waiting' ? 'chip-waiting' : r.estado === 'playing' ? 'chip-playing' : 'chip-finished';
+          return `<div class="room-card" onclick="document.getElementById('joinCode').value='${r.id}';document.getElementById('btnSearch').click()">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3>${r.nombre}</h3>
+              <span class="chip ${chipClass}">${r.estado}</span>
+            </div>
+            <div class="meta">
+              <span class="code">${r.id}</span> · ${r.juego} · $${r.montoEntrada} MXN · ${(r.jugadores || []).length} jugadores
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) { /* skip */ }
+    }
+    loadRooms();
+  </script>
+</body>
+</html>

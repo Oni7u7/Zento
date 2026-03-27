@@ -71,8 +71,12 @@ function getPlayerInRoom(userId, roomId) {
   return players.find(p => p.userId === userId && p.roomId === roomId);
 }
 
+function getAllRooms() {
+  return rooms;
+}
+
 module.exports = {
   createUser, getUserById, getUserByWallet,
-  createRoom, getRoomById, updateRoom,
+  createRoom, getRoomById, updateRoom, getAllRooms,
   addPlayerToRoom, updateScore, getRoomPlayers, getPlayerInRoom
 };

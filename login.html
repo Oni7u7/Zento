@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zento — Iniciar sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .logo { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 40px; }
+    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; }
+    .tabs { display: flex; gap: 0; margin-bottom: 30px; border-bottom: 1px solid #1e1e2e; }
+    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; color: #8888aa; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: "Syne", sans-serif; background: none; border-top: none; border-left: none; border-right: none; }
+    .tab.active { color: #00ff88; border-bottom-color: #00ff88; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: #8888aa; margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 12px 16px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 8px; color: #f0f0f0; font-size: 14px; font-family: "Syne", sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: #7c3aed; }
+    .btn-submit { width: 100%; padding: 14px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px; transition: opacity 0.2s; }
+    .btn-submit:hover { opacity: 0.85; }
+    .error-msg { color: #ff4466; font-size: 13px; margin-top: 8px; display: none; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="logo">ZENTO</div>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="login">Iniciar sesión</button>
+      <button class="tab" data-tab="register">Registrarse</button>
+    </div>
+
+    <div class="tab-content active" id="tab-login">
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-submit">Entrar</button>
+        <div class="error-msg" id="loginError"></div>
+      </form>
+    </div>
+
+    <div class="tab-content" id="tab-register">
+      <form id="registerForm">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="regName" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="tu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="regPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-submit">Crear cuenta</button>
+        <div class="error-msg" id="regError"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    if (localStorage.getItem("zento_user_id")) window.location.href = "lobby.html";
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const userId = "user-" + Date.now();
+      localStorage.setItem("zento_user_id", userId);
+      localStorage.setItem("zento_user_name", email.split("@")[0]);
+      window.location.href = "lobby.html";
+    });
+
+    // Register
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const userId = "user-" + Date.now();
+
+      try {
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, email })
+        });
+      } catch (err) { /* continue anyway */ }
+
+      localStorage.setItem("zento_user_id", userId);
+      localStorage.setItem("zento_user_name", nombre);
+      window.location.href = "lobby.html";
+    });
+  </script>
+</body>
+</html>
