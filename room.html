@@ -3,62 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YieldBet - Sala</title>
+  <title>Zento - Sala</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; }
-    .container { max-width: 600px; margin: 0 auto; padding: 24px 20px; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-    .header h1 { color: #00ff88; font-size: 1.5rem; }
-    .code-badge { background: #1a1a25; border: 1px solid #2a2a3a; padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; color: #00ff88; font-weight: 700; }
-    .live-chip { display: inline-flex; align-items: center; gap: 6px; background: #1a0a0a; border: 1px solid #ff4444; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #ff4444; font-weight: 700; }
-    .live-dot { width: 8px; height: 8px; background: #ff4444; border-radius: 50%; animation: blink 1s infinite; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .mini-logo { font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #836EF9, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .room-name { color: #fff; font-size: 1.3rem; font-weight: 700; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .code-badge { background: #1a1a25; border: 1px solid #836EF9; padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; color: #836EF9; font-weight: 700; letter-spacing: 2px; }
+    .live-chip { display: inline-flex; align-items: center; gap: 6px; background: #0a1a0f; border: 1px solid #00ff88; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #00ff88; font-weight: 700; }
+    .live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: blink 1s infinite; }
     @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    .pool-label { color: #888; font-size: 0.85rem; }
-    .pool-amount { color: #00ff88; font-size: 2.2rem; font-weight: 800; margin: 4px 0; }
-    .pool-yield { color: #00cc6a; font-size: 1rem; }
-    .pool-sub { color: #666; font-size: 0.8rem; margin-top: 4px; }
-    .scoreboard h3 { color: #00ff88; font-size: 1rem; margin-bottom: 12px; }
+
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
+
+    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; }
+    .pool-label { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+    .pool-amount { color: #836EF9; font-size: 2.4rem; font-weight: 800; margin: 8px 0; }
+    .yield-label { color: #888; font-size: 0.85rem; margin-top: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .yield-amount { color: #00ff88; font-size: 1.8rem; font-weight: 800; margin: 4px 0; }
+    .yield-sub { color: #666; font-size: 0.8rem; margin-top: 4px; }
+
+    .scoreboard h3 { color: #836EF9; font-size: 1rem; margin-bottom: 12px; }
     .player-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e1e2e; }
     .player-row:last-child { border-bottom: none; }
-    .pos { color: #00ff88; font-weight: 700; min-width: 24px; }
-    .player-name { flex: 1; }
-    .player-score { color: #00ff88; font-weight: 700; }
-    .bar-container { flex: 1; height: 6px; background: #1a1a25; border-radius: 3px; }
-    .bar-fill { height: 100%; background: #00ff88; border-radius: 3px; transition: width 0.3s; }
-    .play-btn { display: block; width: 100%; padding: 16px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; cursor: pointer; text-align: center; text-decoration: none; transition: opacity 0.2s; }
+    .pos { color: #836EF9; font-weight: 700; min-width: 30px; font-size: 0.95rem; }
+    .player-name { min-width: 100px; font-weight: 600; }
+    .player-name.leader { color: #00ff88; }
+    .player-score { color: #836EF9; font-weight: 700; min-width: 60px; text-align: right; }
+    .bar-container { flex: 1; height: 8px; background: #1a1a25; border-radius: 4px; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, #836EF9, #00ff88); border-radius: 4px; transition: width 0.3s; }
+
+    .footer-actions { display: flex; gap: 12px; align-items: center; }
+    .play-btn { flex: 1; display: block; padding: 18px; background: #836EF9; color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; cursor: pointer; text-align: center; text-decoration: none; transition: opacity 0.2s; }
     .play-btn:hover { opacity: 0.85; }
-    .time-left { color: #888; font-size: 0.85rem; text-align: center; margin-top: 12px; }
-    .back-link { display: block; text-align: center; color: #00ff88; margin-top: 16px; text-decoration: none; font-size: 0.9rem; }
+    .exit-btn { padding: 18px 24px; background: transparent; color: #ff4444; border: 1px solid #ff4444; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .exit-btn:hover { background: #ff444415; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <div>
-        <h1 id="roomName">Cargando...</h1>
-        <span class="live-chip"><span class="live-dot"></span> LIVE</span>
+      <div class="header-left">
+        <span class="mini-logo">ZENTO</span>
+        <span class="room-name" id="roomName">Cargando...</span>
       </div>
-      <span class="code-badge" id="roomCode">---</span>
+      <div class="header-right">
+        <span class="code-badge" id="roomCode">---</span>
+        <span class="live-chip"><span class="live-dot"></span> EN VIVO</span>
+      </div>
     </div>
 
-    <div class="card">
-      <div class="pool-label">Pool Total (CETES)</div>
-      <div class="pool-amount" id="poolAmount">$0.00</div>
-      <div class="pool-yield" id="poolYield">+$0.00 yield</div>
-      <div class="pool-sub" id="poolInfo">0 jugadores &middot; 0 días restantes</div>
+    <div class="panels">
+      <!-- Pool stats -->
+      <div class="card">
+        <div class="pool-label">Pool Total (CETES)</div>
+        <div class="pool-amount" id="poolAmount">$0.00</div>
+        <div class="yield-label">Yield acumulado</div>
+        <div class="yield-amount" id="poolYield">+$0.0000</div>
+        <div class="yield-sub">~9% anual en CETES gubernamentales</div>
+        <div style="color:#666; font-size:0.8rem; margin-top:12px;" id="poolInfo">0 jugadores &middot; 0 días restantes</div>
+      </div>
+
+      <!-- Scoreboard -->
+      <div class="card scoreboard">
+        <h3>Scoreboard</h3>
+        <div id="playerList"><p style="color:#666">Sin jugadores aún</p></div>
+      </div>
     </div>
 
-    <div class="card scoreboard">
-      <h3>Scoreboard</h3>
-      <div id="playerList"><p style="color:#666">Sin jugadores aún</p></div>
+    <div class="footer-actions">
+      <a class="play-btn" id="playBtn" href="#">🎮 JUGAR AHORA</a>
+      <a class="exit-btn" href="index.html">Salir de la sala</a>
     </div>
-
-    <a class="play-btn" id="playBtn" href="#">Jugar ahora</a>
-    <div class="time-left" id="timeLeft"></div>
-    <a class="back-link" href="index.html">&larr; Volver al lobby</a>
   </div>
 
   <script>
@@ -69,7 +92,6 @@
     if (!roomId) { document.body.innerHTML = '<p style="color:#ff4444;padding:40px;text-align:center">No se proporcionó roomId</p>'; }
 
     let roomData = null;
-    let localYield = 0;
     let localElapsed = 0;
 
     async function fetchRoom() {
@@ -89,14 +111,15 @@
         const list = document.getElementById('playerList');
         if (roomData.players && roomData.players.length > 0) {
           const maxScore = Math.max(...roomData.players.map(p => p.score), 1);
-          list.innerHTML = roomData.players.map(p =>
-            `<div class="player-row">
-              <span class="pos">#${p.posicion}</span>
-              <span class="player-name">${p.nombre}</span>
+          list.innerHTML = roomData.players.map(p => {
+            const isLeader = p.posicion === 1 && p.score > 0;
+            return `<div class="player-row">
+              <span class="pos">${isLeader ? '👑' : '#' + p.posicion}</span>
+              <span class="player-name ${isLeader ? 'leader' : ''}">${p.nombre}</span>
               <div class="bar-container"><div class="bar-fill" style="width:${(p.score/maxScore*100)}%"></div></div>
               <span class="player-score">${p.score} pts</span>
-            </div>`
-          ).join('');
+            </div>`;
+          }).join('');
         } else {
           list.innerHTML = '<p style="color:#666">Sin jugadores aún</p>';
         }
@@ -108,11 +131,11 @@
     }
 
     function updateYield() {
-      if (!roomData || !roomData.startTime) return;
+      if (!roomData) return;
       localElapsed++;
       const pool = roomData.montoEntrada * roomData.jugadores.length;
-      localYield = pool * 0.09 * localElapsed / (365 * 24 * 3600);
-      document.getElementById('poolYield').textContent = '+$' + localYield.toFixed(4) + ' yield';
+      const y = pool * 0.09 * localElapsed / (365 * 24 * 3600);
+      document.getElementById('poolYield').textContent = '+$' + y.toFixed(4);
     }
 
     fetchRoom();

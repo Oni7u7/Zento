@@ -1,10 +1,10 @@
 const users = [
-  { id: 'user-001', nombre: 'Alice', walletAddress: '0xAlice123', kycStatus: 'completed', bankAccountId: 'bank-001' },
-  { id: 'user-002', nombre: 'Bob', walletAddress: '0xBob456', kycStatus: 'completed', bankAccountId: 'bank-002' }
+  { id: 'user-001', nombre: 'Alice', apodo: 'CryptoAlice', walletAddress: '0xAlice123', kycStatus: 'completed', bankAccountId: 'bank-001' },
+  { id: 'user-002', nombre: 'Bob', apodo: 'FinanceBob', walletAddress: '0xBob456', kycStatus: 'completed', bankAccountId: 'bank-002' }
 ];
 
 const rooms = [
-  { id: 'SALA01', nombre: 'Trivia Lunes', juego: 'Trivia', montoEntrada: 100, diasDuracion: 7, estado: 'waiting', jugadores: [], createdAt: new Date().toISOString() }
+  { id: 'SALA01', nombre: 'Trivia Zento #1', juego: 'Trivia Financiera', montoEntrada: 100, diasDuracion: 7, estado: 'waiting', jugadores: [], createdAt: new Date().toISOString() }
 ];
 
 const players = [];

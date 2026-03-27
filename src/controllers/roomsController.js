@@ -14,6 +14,10 @@ async function createRoom(req, res) {
     if (!nombre || !juego || !montoEntrada || !diasDuracion) {
       return res.status(400).json({ error: 'Campos requeridos: nombre, juego, montoEntrada, diasDuracion' });
     }
+    const juegosValidos = ['Trivia Financiera', 'Cultura General', 'Mixto'];
+    if (!juegosValidos.includes(juego)) {
+      return res.status(400).json({ error: 'Juego debe ser: Trivia Financiera, Cultura General o Mixto' });
+    }
     const room = db.createRoom({
       id: generateRoomCode(),
       nombre,
@@ -54,7 +58,7 @@ async function getRoom(req, res) {
     const scoreboard = players
       .map((p, i) => {
         const user = db.getUserById(p.userId);
-        return { userId: p.userId, nombre: user?.nombre || p.userId, score: p.score, status: p.status };
+        return { userId: p.userId, nombre: user?.apodo || user?.nombre || p.userId, score: p.score, status: p.status };
       })
       .sort((a, b) => b.score - a.score)
       .map((p, i) => ({ ...p, posicion: i + 1 }));
@@ -153,7 +157,7 @@ async function updateScore(req, res) {
     const scoreboard = allPlayers
       .map(p => {
         const u = db.getUserById(p.userId);
-        return { userId: p.userId, nombre: u?.nombre || p.userId, score: p.score };
+        return { userId: p.userId, nombre: u?.apodo || u?.nombre || p.userId, score: p.score };
       })
       .sort((a, b) => b.score - a.score)
       .map((p, i) => ({ ...p, posicion: i + 1 }));
