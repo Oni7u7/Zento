@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Zento — Juega. Compite. Gana el Rendimiento.</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="contracts.js"></script>
@@ -144,11 +148,67 @@
     .btn-copy:hover { border-color: #00ff88; color: #00ff88; }
     .btn-go { padding: 10px 18px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; }
 
+    /* ── MOBILE ─────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .columns { grid-template-columns: 1fr; }
-      .navbar { padding: 14px 20px; }
+      .navbar { padding: 12px 16px; }
       .step:not(:last-child)::after { display: none; }
-      .steps { gap: 10px; }
+      .steps { gap: 8px; flex-direction: column; padding: 0 16px; }
+      .step { padding: 12px; }
+
+      /* Navbar derecha: compactar */
+      .nav-right { gap: 6px; }
+      .w-net { display: none; }
+      .w-addr { max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .u-name { display: none; }
+      .btn-login { padding: 7px 14px; font-size: 13px; }
+      .btn-logout { padding: 7px 12px; font-size: 12px; }
+      #deployBtn { display: none !important; } /* ocultar en móvil */
+
+      /* Hero */
+      .hero { padding: 40px 16px 30px; }
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 15px; }
+      .yield-ticker { padding: 8px 16px; }
+      .yield-ticker .num { font-size: 18px; }
+
+      /* Main */
+      .main { padding: 0 12px 60px; }
+      .section-title { font-size: 17px; }
+
+      /* Panel */
+      .panel { padding: 20px 16px; }
+      .panel h2 { font-size: 16px; margin-bottom: 16px; }
+
+      /* Buttons */
+      .btn-primary, .btn-secondary { padding: 14px; font-size: 14px; }
+
+      /* Modal */
+      .modal { padding: 24px 18px; border-radius: 14px; }
+      .modal h2 { font-size: 18px; margin-bottom: 20px; }
+      .modal-overlay { padding: 12px; align-items: flex-end; }
+      .modal { border-radius: 20px 20px 0 0; max-width: 100%; }
+
+      /* Room cards */
+      .rooms-grid { grid-template-columns: 1fr; }
+      .room-card { padding: 16px; }
+
+      /* Contracts banner */
+      #contractsBanner { padding: 8px 16px; font-size: 11px; }
+
+      /* Room info */
+      .room-info { padding: 14px; }
+
+      /* Contract step */
+      #contractDeployStatus { font-size: 12px; }
+      #roomContractAddr { font-size: 11px; }
+    }
+
+    @media (max-width: 400px) {
+      .hero h1 { font-size: 24px; }
+      .logo { font-size: 20px; }
+      .wallet-badge { padding: 5px 10px; }
+      .w-addr { max-width: 56px; }
     }
   </style>
 </head>
