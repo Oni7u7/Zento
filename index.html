@@ -211,14 +211,34 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Monto de entrada (MXN)</label>
-            <input type="number" id="roomAmount" min="10" step="10" value="100">
+            <label>Monto de entrada</label>
+            <div style="display:flex;align-items:center;gap:10px;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:8px;padding:11px 14px;">
+              <span style="font-size:22px;font-weight:700;color:#00ff88;">0.1</span>
+              <span style="color:#8888aa;font-size:14px;">MON (Monad Testnet)</span>
+              <span style="margin-left:auto;font-size:11px;color:#8888aa;">≈ $0.10 USD</span>
+            </div>
           </div>
           <div class="form-group">
             <label>Duración (días)</label>
             <input type="number" id="roomDays" min="1" max="30" value="7">
           </div>
-          <button type="submit" class="btn-primary">Crear sala →</button>
+
+          <!-- Paso 1: deploy contrato -->
+          <div id="contractStep" style="margin-bottom:14px;">
+            <div style="font-size:12px;color:#8888aa;margin-bottom:8px;">Paso 1 de 2 — Deploy del contrato en Monad Testnet</div>
+            <button type="button" id="btnDeployRoom" class="btn-secondary" onclick="deployRoomContract()" disabled>
+              ⛓ Desplegar contrato con MetaMask
+            </button>
+            <div id="contractDeployStatus" style="display:none;margin-top:10px;background:#0a0f1a;border:1px solid #00ff88;border-radius:8px;padding:12px;">
+              <div style="font-size:11px;color:#8888aa;">Contrato desplegado ✅</div>
+              <div id="roomContractAddr" style="font-family:monospace;font-size:13px;color:#00ff88;word-break:break-all;margin-top:4px;"></div>
+              <a id="roomContractExplorer" href="#" target="_blank" style="font-size:11px;color:#7c3aed;">Ver en Monad Explorer →</a>
+            </div>
+          </div>
+
+          <!-- Paso 2: crear sala en backend -->
+          <div style="font-size:12px;color:#8888aa;margin-bottom:8px;" id="step2Label" style="opacity:0.4;">Paso 2 de 2 — Registrar sala</div>
+          <button type="submit" class="btn-primary" id="btnCreateRoom" disabled>Crear sala →</button>
           <div class="msg" id="createMsg"></div>
         </form>
       </div>
@@ -343,6 +363,12 @@
         btnLogin.style.display = 'none';
         btnLogout.style.display = 'block';
         document.getElementById('deployBtn').style.display = 'block';
+        // Habilitar deploy si tiene wallet y hay nombre
+        if (currentUser.wallet && document.getElementById('roomName').value.trim()) {
+          document.getElementById('btnDeployRoom').disabled = false;
+        } else if (currentUser.wallet) {
+          document.getElementById('btnDeployRoom').disabled = false;
+        }
         if (currentUser.wallet) {
           wBadge.classList.add('show');
           document.getElementById('navWalletAddr').textContent = currentUser.wallet.slice(0,6)+'...'+currentUser.wallet.slice(-4);
@@ -489,8 +515,9 @@
         grid.innerHTML = rooms.map(r => `
           <div class="room-card" onclick="quickJoin('${r.id}')">
             <h3>${r.nombre}<span class="chip chip-${r.estado}">${r.estado}</span></h3>
-            <div class="meta">${r.juego} · ${r.montoEntrada} MXN · ${r.diasDuracion} días</div>
+            <div class="meta">${r.juego} · ${r.montoEntrada || 0.1} MON · ${r.diasDuracion} días</div>
             <div class="code">${r.id}</div>
+            ${r.contractAddress ? `<div style="font-size:11px;color:#7c3aed;margin-top:6px;font-family:monospace;">⛓ ${r.contractAddress.slice(0,10)}...${r.contractAddress.slice(-6)}</div>` : ''}
           </div>
         `).join('');
       } catch(e) { document.getElementById('roomsGrid').innerHTML = '<div style="color:#8888aa;font-size:14px;">No se pudieron cargar las salas.</div>'; }
@@ -514,9 +541,11 @@
         const res = await fetch('/api/rooms', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
           nombre: document.getElementById('roomName').value,
           juego: document.getElementById('roomGame').value,
-          montoEntrada: parseFloat(document.getElementById('roomAmount').value),
+          montoEntrada: 0.1,
+          montoMoneda: 'MON',
           diasDuracion: parseInt(document.getElementById('roomDays').value),
-          creadorId: currentUser.id
+          creadorId: currentUser.id,
+          contractAddress: roomContractAddress || null
         })});
         const data = await res.json();
         if (!res.ok) throw new Error(data.error||'Error al crear sala');
@@ -551,9 +580,20 @@
         foundRoomId = r.id;
         document.getElementById('ri-nombre').textContent = r.nombre;
         document.getElementById('ri-juego').textContent  = r.juego;
-        document.getElementById('ri-monto').textContent  = r.montoEntrada + ' MXN';
+        document.getElementById('ri-monto').textContent  = (r.montoEntrada || 0.1) + ' MON';
         document.getElementById('ri-estado').textContent = r.estado;
         document.getElementById('ri-jugadores').textContent = (r.jugadores||[]).length + ' jugadores';
+        // Mostrar contrato si tiene
+        const ri = document.getElementById('roomInfo');
+        const existing = ri.querySelector('.contract-info');
+        if (existing) existing.remove();
+        if (r.contractAddress) {
+          const cd = document.createElement('div');
+          cd.className = 'contract-info';
+          cd.style = 'margin-top:10px;padding:10px;background:#0a0f1a;border:1px solid #7c3aed;border-radius:8px;';
+          cd.innerHTML = `<div style="font-size:11px;color:#8888aa;">⛓ Contrato en Monad Testnet</div><div style="font-family:monospace;font-size:12px;color:#a78bfa;word-break:break-all;margin-top:4px;">${r.contractAddress}</div><a href="https://testnet.monadexplorer.com/address/${r.contractAddress}" target="_blank" style="font-size:11px;color:#7c3aed;">Ver en Explorer →</a>`;
+          ri.insertBefore(cd, ri.querySelector('button'));
+        }
         infoEl.style.display = 'block';
       } catch(err) { msgEl.textContent='Error al buscar sala'; msgEl.className='msg error'; }
     }
@@ -584,6 +624,74 @@
     document.getElementById('roomCreatedModal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('roomCreatedModal')) document.getElementById('roomCreatedModal').classList.remove('show');
     });
+
+    // ── DEPLOY CONTRATO POR SALA ──────────────────────────────
+    let roomContractAddress = null;
+    let ethersProvider = null;
+    let ethersSigner = null;
+
+    // Habilitar botón deploy cuando el nombre de sala tiene contenido
+    document.getElementById('roomName').addEventListener('input', function() {
+      const hasName = this.value.trim().length > 0;
+      const isWallet = !!currentUser.wallet;
+      document.getElementById('btnDeployRoom').disabled = !(hasName && isWallet);
+    });
+
+    async function deployRoomContract() {
+      if (!requireLogin()) return;
+      if (!currentUser.wallet) {
+        alert('Necesitas estar logueado con MetaMask para desplegar un contrato.');
+        return;
+      }
+      const roomName = document.getElementById('roomName').value.trim();
+      if (!roomName) { alert('Ingresa el nombre de la sala primero.'); return; }
+
+      const btn = document.getElementById('btnDeployRoom');
+      btn.disabled = true;
+      btn.textContent = '⏳ Desplegando... confirma en MetaMask';
+
+      try {
+        // Conectar ethers
+        if (!ethersProvider) {
+          ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+          ethersSigner = ethersProvider.getSigner();
+        }
+
+        const ENTRY_WEI = ethers.utils.parseEther("0.1"); // 0.1 MON
+        const factory = new ethers.ContractFactory(
+          ZENTO_CONTRACTS.room.abi,
+          ZENTO_CONTRACTS.room.bytecode,
+          ethersSigner
+        );
+
+        btn.textContent = '⏳ Esperando confirmación en la red...';
+        const contract = await factory.deploy(roomName, ENTRY_WEI);
+        await contract.deployed();
+
+        roomContractAddress = contract.address;
+
+        // Mostrar dirección
+        document.getElementById('contractDeployStatus').style.display = 'block';
+        document.getElementById('roomContractAddr').textContent = roomContractAddress;
+        document.getElementById('roomContractExplorer').href = 'https://testnet.monadexplorer.com/address/' + roomContractAddress;
+
+        btn.textContent = '✅ Contrato desplegado';
+        btn.style.background = 'rgba(0,255,136,0.15)';
+        btn.style.color = '#00ff88';
+        btn.style.border = '1px solid #00ff88';
+
+        // Habilitar paso 2
+        document.getElementById('btnCreateRoom').disabled = false;
+        document.getElementById('step2Label').style.opacity = '1';
+
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '⛓ Desplegar contrato con MetaMask';
+        const msg = document.getElementById('createMsg');
+        msg.textContent = 'Error al desplegar: ' + (e.reason || e.message);
+        msg.className = 'msg error';
+      }
+    }
 
     // Mostrar contratos si ya están desplegados
     function showContractsBanner() {
