@@ -67,20 +67,15 @@ export default function RampPanel({ account }) {
         if (orgIdForTnC) setTncCustomerId(orgIdForTnC)
         if (firstBankId) setTncBankId(firstBankId)
 
-        console.log('[Init] orgId para T&C:', orgIdForTnC, '| firstBankId:', firstBankId)
-
-        // 2. Aceptar T&C usando orgId
-        if (orgIdForTnC && firstBankId) {
-          try {
-            await acceptTnC(orgIdForTnC, firstBankId)
-            setWalletStatus('ok')
-          } catch (e) {
-            console.warn('[T&C] Error al aceptar:', e.message)
-            setWalletStatus('pending')
-          }
+        // 2. Si claimOwnership fue exitoso → wallet ya es compliant (org KYB aprobado)
+        if (walletData?.claimedOwnership === true) {
+          console.log('[Init] claimedOwnership=true → wallet compliant, sin necesidad de T&C')
+          setWalletStatus('ok')
         } else {
-          console.warn('[Init] Falta orgId o firstBankId para aceptar T&C | orgId:', orgIdForTnC, '| firstBankId:', firstBankId)
-          setWalletStatus('pending')
+          // org sin KYB aprobado en Etherfuse dashboard → T&C no se pueden aceptar por API
+          console.warn('[Init] claimedOwnership=false o null. Requiere KYB aprobado en devnet.etherfuse.com')
+          console.log('[Init] walletData completo:', JSON.stringify(walletData))
+          setWalletStatus('kyb_required')
         }
       } catch (err) {
         setError('Error cargando datos: ' + err.message)
@@ -160,7 +155,7 @@ export default function RampPanel({ account }) {
 
   const handleCreateOrder = async () => {
     if (walletStatus !== 'ok') {
-      setError('Tu wallet aún no tiene los Términos y Condiciones aceptados. Usa el botón "Aceptar T&C" antes de crear una orden.')
+      setError('Tu organización debe completar KYB en devnet.etherfuse.com antes de crear órdenes.')
       return
     }
     if (!selectedBank) {
@@ -219,17 +214,21 @@ export default function RampPanel({ account }) {
         {walletStatus === 'error' && (
           <p className="wallet-error">Wallet no pudo registrarse en Etherfuse. Revisa la consola.</p>
         )}
-        {walletStatus === 'pending' && (
-          <div style={{textAlign:'center', marginBottom: 12}}>
-            <p className="ramp-hint">⚠ Wallet sin T&C aceptados — no podrás crear órdenes.</p>
-            <button
+        {(walletStatus === 'pending' || walletStatus === 'kyb_required') && (
+          <div style={{textAlign:'center', marginBottom: 12, padding: '10px', background: '#fff3cd', borderRadius: 8, border: '1px solid #ffc107'}}>
+            <p style={{margin: 0, fontWeight: 600, color: '#856404'}}>⚠ KYB pendiente en Etherfuse</p>
+            <p style={{margin: '6px 0 0', fontSize: 13, color: '#856404'}}>
+              Para crear órdenes, tu organización debe completar la verificación KYB en el dashboard de Etherfuse sandbox.
+            </p>
+            <a
+              href="https://devnet.etherfuse.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn-connect"
-              onClick={handleRetryTnC}
-              disabled={loadingTnc}
-              style={{marginTop: 8, fontSize: 13}}
+              style={{display: 'inline-block', marginTop: 10, fontSize: 13, textDecoration: 'none'}}
             >
-              {loadingTnc ? 'Aceptando T&C...' : '🔄 Aceptar Términos y Condiciones'}
-            </button>
+              🔗 Completar KYB en devnet.etherfuse.com
+            </a>
           </div>
         )}
         {/* Orden completada */}
