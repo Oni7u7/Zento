@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd Zento && npm install && npm run build",
-  "outputDirectory": "Zento/dist",
-  "installCommand": "echo skip"
-}
