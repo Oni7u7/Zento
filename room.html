@@ -129,17 +129,15 @@
       </div>
     </div>
 
-    <div class="waiting-section" id="waitingSection" style="display:none;">
-      <div class="waiting-dots"><span>.</span><span>.</span><span>.</span></div>
-      <h3>Esperando m&aacute;s jugadores...</h3>
-      <div class="player-count-big" id="playerCountDisplay"><span>1</span> / 2 min</div>
-      <p style="color:#8888aa;font-size:13px;">Comparte el c&oacute;digo de la sala para que otros se unan</p>
-      <button class="share-btn" onclick="copyRoomLink(this)">&#128203; Compartir sala</button>
+    <!-- Invite banner (visible siempre, no bloquea) -->
+    <div class="waiting-section" id="inviteBanner" style="margin-top:20px;">
+      <p style="color:#8888aa;font-size:14px;margin-bottom:10px;">¡Invita a tus amigos con el código de sala!</p>
+      <button class="share-btn" onclick="copyRoomLink(this)">📋 Compartir link</button>
     </div>
 
-    <div class="room-footer" id="roomFooter">
-      <a class="btn-play" id="btnPlay" href="#">&#127918; JUGAR AHORA</a>
-      <div class="room-estado" id="roomEstado"></div>
+    <div class="room-footer" id="roomFooter" style="margin-top:28px;">
+      <a class="btn-play" id="btnPlay" href="#">🎮 JUGAR AHORA</a>
+      <div class="room-estado" id="roomEstado" style="margin-top:10px;"></div>
     </div>
   </div>
 
@@ -212,18 +210,13 @@
           '</div>';
         }).join('') || '<div style="color:#8888aa;font-size:14px;">Sin jugadores a\u00FAn</div>';
 
-        // Waiting section
-        var waitingSection = document.getElementById('waitingSection');
-        var footerSection = document.getElementById('roomFooter');
-        if (playerCount < 2) {
-          waitingSection.style.display = 'block';
-          document.getElementById('playerCountDisplay').innerHTML = '<span>' + playerCount + '</span> / 2 min';
-          footerSection.querySelector('.btn-play').style.opacity = '0.5';
-          footerSection.querySelector('.btn-play').style.pointerEvents = 'none';
-        } else {
-          waitingSection.style.display = 'none';
-          footerSection.querySelector('.btn-play').style.opacity = '1';
-          footerSection.querySelector('.btn-play').style.pointerEvents = 'auto';
+        // Botón jugar siempre activo
+        document.getElementById('btnPlay').style.opacity = '1';
+        document.getElementById('btnPlay').style.pointerEvents = 'auto';
+        // Actualizar invite banner con player count
+        var inviteBanner = document.getElementById('inviteBanner');
+        if (playerCount > 0) {
+          inviteBanner.querySelector('p').textContent = playerCount + ' jugador' + (playerCount > 1 ? 'es' : '') + ' en sala — ¡invita más amigos!';
         }
 
         if (data.startTime) {

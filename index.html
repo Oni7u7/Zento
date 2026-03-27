@@ -325,9 +325,26 @@
       <!-- Unirse a sala -->
       <div class="panel">
         <h2>🔍 Unirse a sala</h2>
+
+        <!-- Pasos del participante -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <div style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:4px;">1️⃣</div>
+            <div style="font-size:11px;color:#8888aa;line-height:1.4;">Login o wallet</div>
+          </div>
+          <div style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:4px;">2️⃣</div>
+            <div style="font-size:11px;color:#8888aa;line-height:1.4;">Código de sala</div>
+          </div>
+          <div style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:4px;">3️⃣</div>
+            <div style="font-size:11px;color:#8888aa;line-height:1.4;">¡A jugar! 🎮</div>
+          </div>
+        </div>
+
         <div class="form-group" style="margin-bottom:18px;">
           <label>Código de sala</label>
-          <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6">
+          <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6" style="text-transform:uppercase;">
         </div>
         <button class="btn-secondary" onclick="searchRoom()">Buscar sala</button>
 
