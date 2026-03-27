@@ -808,13 +808,26 @@
           }
         }
 
-        btn.textContent = '⏳ Confirma el depósito...';
+        btn.textContent = '⏳ Verificando contrato...';
         const contract = new ethers.Contract(
           foundRoomContractAddress,
           ZENTO_CONTRACTS.room.abi,
           ethersSigner
         );
 
+        // Verificar que el contrato existe en la red antes de llamarlo
+        const code = await ethersProvider.getCode(foundRoomContractAddress);
+        if (code === '0x' || code === '0x0') {
+          // No hay contrato en esa dirección — unirse directo
+          btn.disabled = false;
+          btn.innerHTML = '💰 Depositar 0.1 MON y unirse';
+          msgEl.textContent = 'El contrato no está desplegado en esta red. Uniéndote sin depósito...';
+          msgEl.className = 'msg error';
+          setTimeout(() => joinDirect(), 1500);
+          return;
+        }
+
+        btn.textContent = '⏳ Confirma el depósito en MetaMask...';
         const tx = await contract.deposit({ value: ethers.utils.parseEther('0.1') });
         btn.textContent = '⏳ Confirmando en la red...';
         await tx.wait();
@@ -835,7 +848,18 @@
       } catch(e) {
         btn.disabled = false;
         btn.innerHTML = '💰 Depositar 0.1 MON y unirse';
-        const msg = e.code === 4001 ? 'Cancelaste la transacción en MetaMask.' : (e.reason || e.message || 'Error desconocido');
+        let msg;
+        if (e.code === 4001 || e.code === 'ACTION_REJECTED') {
+          msg = 'Cancelaste la transacción en MetaMask.';
+        } else if (e.code === -32603 || (e.message && e.message.includes('JSON-RPC'))) {
+          msg = 'Error de red. Verifica que estás en Monad Testnet y que el contrato esté desplegado.';
+        } else if (e.message && e.message.includes('Already deposited')) {
+          msg = 'Ya depositaste en esta sala anteriormente.';
+        } else if (e.message && e.message.includes('Wrong entry amount')) {
+          msg = 'El monto debe ser exactamente 0.1 MON.';
+        } else {
+          msg = e.reason || e.data?.message || e.message || 'Error desconocido';
+        }
         msgEl.textContent = 'Error: ' + msg;
         msgEl.className = 'msg error';
       }
