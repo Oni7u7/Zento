@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YieldBet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; }
+    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+    h1 { color: #00ff88; font-size: 2.5rem; text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #888; margin-bottom: 40px; font-size: 0.95rem; }
+    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .card h2 { color: #00ff88; font-size: 1.3rem; margin-bottom: 16px; }
+    label { display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 4px; margin-top: 12px; }
+    input, select { width: 100%; padding: 10px 14px; background: #1a1a25; border: 1px solid #2a2a3a; border-radius: 8px; color: #fff; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; }
+    input:focus, select:focus { border-color: #00ff88; }
+    button { width: 100%; padding: 12px; margin-top: 16px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    button:hover { opacity: 0.85; }
+    .result { margin-top: 16px; padding: 14px; background: #1a1a25; border-radius: 8px; display: none; }
+    .result.show { display: block; }
+    .result .code { color: #00ff88; font-size: 1.8rem; font-weight: 800; text-align: center; }
+    .result .link { color: #00ff88; font-size: 0.8rem; text-align: center; word-break: break-all; margin-top: 8px; }
+    .room-info { display: none; }
+    .room-info.show { display: block; }
+    .room-info h3 { color: #00ff88; margin-bottom: 8px; }
+    .room-info p { margin: 4px 0; color: #ccc; font-size: 0.9rem; }
+    .room-info .join-btn { background: #00ff88; }
+    .error { color: #ff4444; font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>YieldBet</h1>
+    <p class="subtitle">Apuesta, juega y gana rendimiento real</p>
+
+    <div class="card">
+      <h2>Crear Sala</h2>
+      <label>Nombre de la sala</label>
+      <input type="text" id="roomName" placeholder="Ej: Trivia Nocturna">
+      <label>Juego</label>
+      <select id="roomGame">
+        <option value="Trivia">Trivia</option>
+        <option value="Reaction">Reaction</option>
+        <option value="Predictor">Predictor</option>
+      </select>
+      <label>Monto de entrada (MXN)</label>
+      <input type="number" id="roomAmount" placeholder="100" min="1">
+      <label>Duración (días)</label>
+      <input type="number" id="roomDays" placeholder="7" min="1">
+      <button id="createBtn">Crear Sala</button>
+      <div class="result" id="createResult">
+        <div class="code" id="roomCode"></div>
+        <div class="link" id="roomLink"></div>
+      </div>
+      <div class="error" id="createError"></div>
+    </div>
+
+    <div class="card">
+      <h2>Unirse a Sala</h2>
+      <label>Código de sala</label>
+      <input type="text" id="joinCode" placeholder="Ej: SALA01" maxlength="6" style="text-transform: uppercase;">
+      <button id="lookupBtn">Buscar Sala</button>
+      <div class="error" id="joinError"></div>
+      <div class="room-info" id="roomInfo">
+        <h3 id="infoName"></h3>
+        <p>Juego: <span id="infoGame"></span></p>
+        <p>Entrada: $<span id="infoAmount"></span> MXN</p>
+        <p>Duración: <span id="infoDays"></span> días</p>
+        <p>Jugadores: <span id="infoPlayers"></span></p>
+        <p>Estado: <span id="infoStatus"></span></p>
+        <button class="join-btn" id="joinBtn">Unirse</button>
+        <button id="enterBtn" style="background:#1a1a25; color:#00ff88; border:1px solid #00ff88; margin-top:8px;">Entrar a la sala</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+
+    document.getElementById('createBtn').addEventListener('click', async () => {
+      const err = document.getElementById('createError');
+      err.textContent = '';
+      const body = {
+        nombre: document.getElementById('roomName').value,
+        juego: document.getElementById('roomGame').value,
+        montoEntrada: Number(document.getElementById('roomAmount').value),
+        diasDuracion: Number(document.getElementById('roomDays').value),
+        creadorId: 'user-001'
+      };
+      if (!body.nombre || !body.montoEntrada || !body.diasDuracion) {
+        err.textContent = 'Completa todos los campos';
+        return;
+      }
+      try {
+        const res = await fetch(API + '/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('roomCode').textContent = data.id;
+        document.getElementById('roomLink').textContent = window.location.origin + '/room.html?roomId=' + data.id;
+        document.getElementById('createResult').classList.add('show');
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    });
+
+    let currentRoom = null;
+    document.getElementById('lookupBtn').addEventListener('click', async () => {
+      const err = document.getElementById('joinError');
+      err.textContent = '';
+      const code = document.getElementById('joinCode').value.toUpperCase().trim();
+      if (!code) { err.textContent = 'Ingresa un código'; return; }
+      try {
+        const res = await fetch(API + '/api/rooms/' + code);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        currentRoom = data;
+        document.getElementById('infoName').textContent = data.nombre;
+        document.getElementById('infoGame').textContent = data.juego;
+        document.getElementById('infoAmount').textContent = data.montoEntrada;
+        document.getElementById('infoDays').textContent = data.diasDuracion;
+        document.getElementById('infoPlayers').textContent = data.jugadores.length;
+        document.getElementById('infoStatus').textContent = data.estado;
+        document.getElementById('roomInfo').classList.add('show');
+      } catch (e) {
+        err.textContent = e.message;
+        document.getElementById('roomInfo').classList.remove('show');
+      }
+    });
+
+    document.getElementById('joinBtn').addEventListener('click', async () => {
+      if (!currentRoom) return;
+      const err = document.getElementById('joinError');
+      try {
+        const res = await fetch(API + '/api/rooms/' + currentRoom.id + '/join', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: 'user-001' })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('infoPlayers').textContent = data.jugadores.length;
+        alert('Te uniste a la sala!');
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    });
+
+    document.getElementById('enterBtn').addEventListener('click', () => {
+      if (currentRoom) window.location.href = 'room.html?roomId=' + currentRoom.id;
+    });
+  </script>
+</body>
+</html>

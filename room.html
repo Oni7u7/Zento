@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YieldBet - Sala</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; }
+    .container { max-width: 600px; margin: 0 auto; padding: 24px 20px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .header h1 { color: #00ff88; font-size: 1.5rem; }
+    .code-badge { background: #1a1a25; border: 1px solid #2a2a3a; padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; color: #00ff88; font-weight: 700; }
+    .live-chip { display: inline-flex; align-items: center; gap: 6px; background: #1a0a0a; border: 1px solid #ff4444; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #ff4444; font-weight: 700; }
+    .live-dot { width: 8px; height: 8px; background: #ff4444; border-radius: 50%; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .pool-label { color: #888; font-size: 0.85rem; }
+    .pool-amount { color: #00ff88; font-size: 2.2rem; font-weight: 800; margin: 4px 0; }
+    .pool-yield { color: #00cc6a; font-size: 1rem; }
+    .pool-sub { color: #666; font-size: 0.8rem; margin-top: 4px; }
+    .scoreboard h3 { color: #00ff88; font-size: 1rem; margin-bottom: 12px; }
+    .player-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e1e2e; }
+    .player-row:last-child { border-bottom: none; }
+    .pos { color: #00ff88; font-weight: 700; min-width: 24px; }
+    .player-name { flex: 1; }
+    .player-score { color: #00ff88; font-weight: 700; }
+    .bar-container { flex: 1; height: 6px; background: #1a1a25; border-radius: 3px; }
+    .bar-fill { height: 100%; background: #00ff88; border-radius: 3px; transition: width 0.3s; }
+    .play-btn { display: block; width: 100%; padding: 16px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; cursor: pointer; text-align: center; text-decoration: none; transition: opacity 0.2s; }
+    .play-btn:hover { opacity: 0.85; }
+    .time-left { color: #888; font-size: 0.85rem; text-align: center; margin-top: 12px; }
+    .back-link { display: block; text-align: center; color: #00ff88; margin-top: 16px; text-decoration: none; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 id="roomName">Cargando...</h1>
+        <span class="live-chip"><span class="live-dot"></span> LIVE</span>
+      </div>
+      <span class="code-badge" id="roomCode">---</span>
+    </div>
+
+    <div class="card">
+      <div class="pool-label">Pool Total (CETES)</div>
+      <div class="pool-amount" id="poolAmount">$0.00</div>
+      <div class="pool-yield" id="poolYield">+$0.00 yield</div>
+      <div class="pool-sub" id="poolInfo">0 jugadores &middot; 0 días restantes</div>
+    </div>
+
+    <div class="card scoreboard">
+      <h3>Scoreboard</h3>
+      <div id="playerList"><p style="color:#666">Sin jugadores aún</p></div>
+    </div>
+
+    <a class="play-btn" id="playBtn" href="#">Jugar ahora</a>
+    <div class="time-left" id="timeLeft"></div>
+    <a class="back-link" href="index.html">&larr; Volver al lobby</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get('roomId');
+    const userId = params.get('userId') || 'user-001';
+
+    if (!roomId) { document.body.innerHTML = '<p style="color:#ff4444;padding:40px;text-align:center">No se proporcionó roomId</p>'; }
+
+    let roomData = null;
+    let localYield = 0;
+    let localElapsed = 0;
+
+    async function fetchRoom() {
+      try {
+        const res = await fetch('/api/rooms/' + roomId);
+        roomData = await res.json();
+        document.getElementById('roomName').textContent = roomData.nombre;
+        document.getElementById('roomCode').textContent = roomData.id;
+        localElapsed = roomData.secondsElapsed || 0;
+
+        const pool = roomData.montoEntrada * roomData.jugadores.length;
+        document.getElementById('poolAmount').textContent = '$' + pool.toFixed(2);
+
+        const days = Math.ceil((roomData.tiempoRestante || 0) / 86400);
+        document.getElementById('poolInfo').textContent = roomData.jugadores.length + ' jugadores · ' + days + ' días restantes';
+
+        const list = document.getElementById('playerList');
+        if (roomData.players && roomData.players.length > 0) {
+          const maxScore = Math.max(...roomData.players.map(p => p.score), 1);
+          list.innerHTML = roomData.players.map(p =>
+            `<div class="player-row">
+              <span class="pos">#${p.posicion}</span>
+              <span class="player-name">${p.nombre}</span>
+              <div class="bar-container"><div class="bar-fill" style="width:${(p.score/maxScore*100)}%"></div></div>
+              <span class="player-score">${p.score} pts</span>
+            </div>`
+          ).join('');
+        } else {
+          list.innerHTML = '<p style="color:#666">Sin jugadores aún</p>';
+        }
+
+        document.getElementById('playBtn').href = 'trivia.html?roomId=' + roomId + '&userId=' + userId;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function updateYield() {
+      if (!roomData || !roomData.startTime) return;
+      localElapsed++;
+      const pool = roomData.montoEntrada * roomData.jugadores.length;
+      localYield = pool * 0.09 * localElapsed / (365 * 24 * 3600);
+      document.getElementById('poolYield').textContent = '+$' + localYield.toFixed(4) + ' yield';
+    }
+
+    fetchRoom();
+    setInterval(fetchRoom, 5000);
+    setInterval(updateYield, 1000);
+  </script>
+</body>
+</html>

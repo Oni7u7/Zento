@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YieldBet - Trivia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .container { max-width: 600px; width: 100%; padding: 24px 20px; }
+    .progress-bar { width: 100%; height: 6px; background: #1a1a25; border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #00ff88; border-radius: 3px; transition: width 0.3s linear; }
+    .timer-bar { width: 100%; height: 4px; background: #1a1a25; border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+    .timer-fill { height: 100%; background: #ff4444; border-radius: 2px; transition: width 1s linear; }
+    .q-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; color: #888; }
+    .question { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 24px; line-height: 1.4; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn { padding: 14px 18px; background: #12121a; border: 1px solid #2a2a3a; border-radius: 10px; color: #e0e0e0; font-family: 'Syne', sans-serif; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.2s; }
+    .option-btn:hover { border-color: #00ff88; background: #1a1a25; }
+    .option-btn.correct { background: #003322; border-color: #00ff88; color: #00ff88; }
+    .option-btn.wrong { background: #330011; border-color: #ff4444; color: #ff4444; }
+    .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+    .score-display { text-align: center; color: #00ff88; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .result-screen { text-align: center; display: none; }
+    .result-screen.show { display: block; }
+    .result-score { color: #00ff88; font-size: 3rem; font-weight: 800; margin: 16px 0; }
+    .result-label { color: #888; font-size: 1rem; margin-bottom: 24px; }
+    .scoreboard-final { text-align: left; margin: 0 auto; max-width: 400px; }
+    .scoreboard-final .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e1e2e; }
+    .scoreboard-final .row .name { color: #ccc; }
+    .scoreboard-final .row .pts { color: #00ff88; font-weight: 700; }
+    .back-btn { display: inline-block; margin-top: 24px; padding: 14px 32px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .game-area { }
+    .game-area.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="game-area" id="gameArea">
+      <div class="score-display" id="scoreDisplay">Puntos: 0</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="q-header">
+        <span id="qNumber">Pregunta 1/10</span>
+        <span id="timerText">20s</span>
+      </div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+      <div class="question" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+    </div>
+
+    <div class="result-screen" id="resultScreen">
+      <h2 style="color:#fff; margin-bottom:8px;">Trivia completada</h2>
+      <div class="result-score" id="finalScore">0</div>
+      <div class="result-label">puntos totales</div>
+      <h3 style="color:#00ff88; margin-bottom:12px;">Scoreboard</h3>
+      <div class="scoreboard-final" id="finalScoreboard"></div>
+      <a class="back-btn" id="backBtn" href="#">Volver a sala</a>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get('roomId');
+    const userId = params.get('userId') || 'user-001';
+
+    const questions = [
+      { q: '¿Qué son los CETES?', opts: ['Certificados de la Tesorería', 'Créditos empresariales', 'Criptomonedas', 'Contratos de futuros'], ans: 0 },
+      { q: '¿Cuál es la moneda oficial de Japón?', opts: ['Yuan', 'Won', 'Yen', 'Ringgit'], ans: 2 },
+      { q: '¿Qué significa APY en finanzas?', opts: ['Annual Payment Yield', 'Annual Percentage Yield', 'Average Price Yearly', 'Asset Portfolio Yield'], ans: 1 },
+      { q: '¿Quién pintó la Mona Lisa?', opts: ['Miguel Ángel', 'Rafael', 'Leonardo da Vinci', 'Botticelli'], ans: 2 },
+      { q: '¿Qué es un stablebond?', opts: ['Bono volátil', 'Bono estable tokenizado', 'Acción de empresa', 'Derivado financiero'], ans: 1 },
+      { q: '¿En qué año se fundó Bitcoin?', opts: ['2007', '2008', '2009', '2010'], ans: 2 },
+      { q: '¿Qué planeta es el más grande del sistema solar?', opts: ['Saturno', 'Neptuno', 'Júpiter', 'Urano'], ans: 2 },
+      { q: '¿Qué es DeFi?', opts: ['Finanzas centralizadas', 'Finanzas descentralizadas', 'Déficit financiero', 'Derivados fijos'], ans: 1 },
+      { q: '¿Cuántos continentes hay?', opts: ['5', '6', '7', '8'], ans: 2 },
+      { q: '¿Qué es yield farming?', opts: ['Agricultura digital', 'Generar rendimiento con cripto', 'Minería de datos', 'Trading de alta frecuencia'], ans: 1 }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let timeLeft = 20;
+    let timer = null;
+
+    function renderQuestion() {
+      if (current >= questions.length) { endGame(); return; }
+      const q = questions[current];
+      document.getElementById('qNumber').textContent = `Pregunta ${current + 1}/10`;
+      document.getElementById('progressFill').style.width = ((current) / 10 * 100) + '%';
+      document.getElementById('questionText').textContent = q.q;
+      document.getElementById('scoreDisplay').textContent = 'Puntos: ' + score;
+
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = q.opts.map((o, i) =>
+        `<button class="option-btn" data-idx="${i}">${o}</button>`
+      ).join('');
+
+      container.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleAnswer(Number(btn.dataset.idx)));
+      });
+
+      timeLeft = 20;
+      document.getElementById('timerText').textContent = '20s';
+      document.getElementById('timerFill').style.width = '100%';
+
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timerText').textContent = timeLeft + 's';
+        document.getElementById('timerFill').style.width = (timeLeft / 20 * 100) + '%';
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          handleAnswer(-1);
+        }
+      }, 1000);
+    }
+
+    function handleAnswer(idx) {
+      clearInterval(timer);
+      const q = questions[current];
+      const btns = document.querySelectorAll('.option-btn');
+      btns.forEach(b => b.classList.add('disabled'));
+
+      btns[q.ans].classList.add('correct');
+      if (idx === q.ans) {
+        score += Math.round(timeLeft / 20 * 100);
+      } else if (idx >= 0) {
+        btns[idx].classList.add('wrong');
+      }
+
+      document.getElementById('scoreDisplay').textContent = 'Puntos: ' + score;
+      setTimeout(() => { current++; renderQuestion(); }, 1200);
+    }
+
+    async function endGame() {
+      clearInterval(timer);
+      document.getElementById('gameArea').classList.add('hidden');
+      document.getElementById('resultScreen').classList.add('show');
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('backBtn').href = 'room.html?roomId=' + roomId + '&userId=' + userId;
+
+      try {
+        const res = await fetch('/api/rooms/' + roomId + '/score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, puntos: score })
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          document.getElementById('finalScoreboard').innerHTML = data.map(p =>
+            `<div class="row"><span class="name">#${p.posicion} ${p.nombre}</span><span class="pts">${p.score} pts</span></div>`
+          ).join('');
+        }
+      } catch (e) {
+        console.error('Error posting score:', e);
+      }
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
