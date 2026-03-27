@@ -18,8 +18,25 @@ export default function RampPanel({ account }) {
   const [loadingAssets, setLoadingAssets] = useState(true)
   const [loadingQuote, setLoadingQuote] = useState(false)
   const [loadingOrder, setLoadingOrder] = useState(false)
-  const [walletStatus, setWalletStatus] = useState(null) // 'ok' | 'error' | null
+  const [loadingTnc, setLoadingTnc] = useState(false)
+  const [walletStatus, setWalletStatus] = useState(null) // 'ok' | 'pending' | 'error' | null
+  const [tncCustomerId, setTncCustomerId] = useState(null)
+  const [tncBankId, setTncBankId] = useState(null)
   const [error, setError] = useState(null)
+
+  // Función reutilizable para aceptar T&C
+  const acceptTnC = async (customerId, bankAccountId) => {
+    console.log('[T&C] Iniciando aceptación | customerId:', customerId, '| bankAccountId:', bankAccountId)
+    const onboardingRes = await api.getOnboardingUrl(customerId, bankAccountId, account, BLOCKCHAIN)
+    console.log('[T&C] onboarding response completo:', JSON.stringify(onboardingRes))
+    const presignedUrl = onboardingRes?.presigned_url ?? onboardingRes?.presignedUrl ?? onboardingRes?.url
+    if (!presignedUrl) {
+      throw new Error('No se obtuvo presignedUrl. Respuesta: ' + JSON.stringify(onboardingRes))
+    }
+    const results = await api.acceptAllAgreements(presignedUrl)
+    console.log('[T&C] Acuerdos aceptados:', results)
+    return results
+  }
 
   // Cargar assets, cuentas bancarias e identidad org al montar
   useEffect(() => {
@@ -33,9 +50,11 @@ export default function RampPanel({ account }) {
           api.getOrgIdentity(),
         ])
 
+        console.log('[Init] walletData completo:', JSON.stringify(walletData))
+
         const list = assetsData?.assets ?? []
         const banks = banksData?.items ?? []
-        const customerId = walletData?.customerId ?? null
+        const customerId = walletData?.customerId ?? walletData?.customer_id ?? null
         const firstBankId = banks[0]?.bankAccountId ?? null
 
         setAssets(list)
@@ -43,29 +62,21 @@ export default function RampPanel({ account }) {
         setOrgId(identityData?.id ?? null)
         if (list.length) setSelectedAsset(list[0].identifier ?? list[0].id)
         if (firstBankId) setSelectedBank(firstBankId)
+        if (customerId) setTncCustomerId(customerId)
+        if (firstBankId) setTncBankId(firstBankId)
 
         // 2. Aceptar T&C
-        console.log('customerId:', customerId, '| firstBankId:', firstBankId)
         if (customerId && firstBankId) {
           try {
-            const onboardingRes = await api.getOnboardingUrl(customerId, firstBankId, account, BLOCKCHAIN)
-            console.log('onboarding URL response:', onboardingRes)
-            const presignedUrl = onboardingRes?.presigned_url ?? onboardingRes?.presignedUrl
-            if (presignedUrl) {
-              const results = await api.acceptAllAgreements(presignedUrl)
-              console.log('Acuerdos:', results)
-              setWalletStatus('ok')
-            } else {
-              console.warn('No se obtuvo presigned_url:', onboardingRes)
-              setWalletStatus('pending')
-            }
+            await acceptTnC(customerId, firstBankId)
+            setWalletStatus('ok')
           } catch (e) {
-            console.warn('T&C error:', e.message)
-            setWalletStatus(walletData?.claimedOwnership === true ? 'ok' : 'pending')
+            console.warn('[T&C] Error al aceptar:', e.message)
+            setWalletStatus('pending')
           }
         } else {
-          console.warn('Falta customerId o firstBankId para aceptar T&C')
-          setWalletStatus(walletData?.claimedOwnership === true ? 'ok' : 'pending')
+          console.warn('[Init] Falta customerId o firstBankId para aceptar T&C | customerId:', customerId, '| firstBankId:', firstBankId)
+          setWalletStatus('pending')
         }
       } catch (err) {
         setError('Error cargando datos: ' + err.message)
@@ -125,7 +136,29 @@ export default function RampPanel({ account }) {
     }
   }
 
+  const handleRetryTnC = async () => {
+    if (!tncCustomerId || !tncBankId) {
+      setError('No se tienen datos suficientes para aceptar T&C. Recarga la página.')
+      return
+    }
+    setError(null)
+    setLoadingTnc(true)
+    try {
+      await acceptTnC(tncCustomerId, tncBankId)
+      setWalletStatus('ok')
+    } catch (e) {
+      console.error('[T&C retry] Error:', e.message)
+      setError('Error al aceptar T&C: ' + e.message)
+    } finally {
+      setLoadingTnc(false)
+    }
+  }
+
   const handleCreateOrder = async () => {
+    if (walletStatus !== 'ok') {
+      setError('Tu wallet aún no tiene los Términos y Condiciones aceptados. Usa el botón "Aceptar T&C" antes de crear una orden.')
+      return
+    }
     if (!selectedBank) {
       setError('Se requiere una cuenta bancaria registrada para crear la orden.')
       return
@@ -183,7 +216,17 @@ export default function RampPanel({ account }) {
           <p className="wallet-error">Wallet no pudo registrarse en Etherfuse. Revisa la consola.</p>
         )}
         {walletStatus === 'pending' && (
-          <p className="ramp-hint" style={{textAlign:'center'}}>⚠ Wallet registrada pero KYC pendiente — las órdenes pueden fallar.</p>
+          <div style={{textAlign:'center', marginBottom: 12}}>
+            <p className="ramp-hint">⚠ Wallet sin T&C aceptados — no podrás crear órdenes.</p>
+            <button
+              className="btn-connect"
+              onClick={handleRetryTnC}
+              disabled={loadingTnc}
+              style={{marginTop: 8, fontSize: 13}}
+            >
+              {loadingTnc ? 'Aceptando T&C...' : '🔄 Aceptar Términos y Condiciones'}
+            </button>
+          </div>
         )}
         {/* Orden completada */}
         {order ? (
