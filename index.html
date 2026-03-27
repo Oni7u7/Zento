@@ -354,16 +354,17 @@
           <div class="detail"><span>Entrada</span><span id="ri-monto"></span></div>
           <div class="detail"><span>Estado</span><span id="ri-estado"></span></div>
           <div class="detail"><span>Jugadores</span><span id="ri-jugadores"></span></div>
-          <button class="btn-primary" id="btnJoinRoom" style="margin-top:14px;" onclick="joinRoom()">Unirse →</button>
-          <div id="depositPanel" style="display:none; margin-top:14px; padding:18px; background:#0a0f1a; border:1px solid #7c3aed; border-radius:12px;">
-            <div style="text-align:center; margin-bottom:12px;">
-              <div style="font-size:13px; color:#8888aa;">Depositar para unirse</div>
-              <div style="font-size:28px; font-weight:700; color:#00ff88; margin:8px 0;">0.1 MON</div>
-            </div>
-            <button class="btn-primary" id="btnDeposit" onclick="depositAndJoin()" style="background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#fff;">
-              💰 Depositar con MetaMask
+          <!-- Botón principal de unirse -->
+          <div id="joinActions" style="margin-top:14px;">
+            <!-- Si hay contrato + wallet: depositar -->
+            <button class="btn-primary" id="btnDeposit" onclick="depositAndJoin()" style="display:none; background:linear-gradient(135deg,#7c3aed,#5b21b6); color:#fff; margin-bottom:8px;">
+              💰 Depositar 0.1 MON y unirse
             </button>
-            <div style="font-size:11px; color:#8888aa; text-align:center; margin-top:8px;">Se ejecutará deposit() en el smart contract</div>
+            <!-- Join directo (sin contrato o sin wallet) -->
+            <button class="btn-primary" id="btnJoinRoom" onclick="joinDirect()">
+              ✅ Unirse a la sala →
+            </button>
+            <div id="joinHint" style="font-size:11px;color:#8888aa;text-align:center;margin-top:6px;"></div>
           </div>
           <div class="msg" id="joinMsg"></div>
         </div>
@@ -698,6 +699,7 @@
         const r = await res.json();
         foundRoomId = r.id;
         foundRoomContractAddress = r.contractAddress || null;
+        updateJoinButtons();
         document.getElementById('ri-nombre').textContent = r.nombre;
         document.getElementById('ri-juego').textContent  = r.juego;
         document.getElementById('ri-monto').textContent  = (r.montoEntrada || 0.1) + ' MON';
@@ -718,50 +720,123 @@
       } catch(err) { msgEl.textContent='Error al buscar sala'; msgEl.className='msg error'; }
     }
 
-    async function joinRoom() {
+    // Mostrar los botones correctos según si hay contrato + wallet
+    function updateJoinButtons() {
+      const hasContract = !!foundRoomContractAddress;
+      const hasWallet   = !!(currentUser.wallet && window.ethereum);
+      const btnDeposit  = document.getElementById('btnDeposit');
+      const btnJoin     = document.getElementById('btnJoinRoom');
+      const hint        = document.getElementById('joinHint');
+
+      if (hasContract && hasWallet) {
+        // Mostrar ambos: depósito en contrato (preferido) + join directo como alternativa
+        btnDeposit.style.display = 'block';
+        btnJoin.textContent = 'Entrar sin depositar →';
+        btnJoin.style.background = 'none';
+        btnJoin.style.border = '1px solid #1e1e2e';
+        btnJoin.style.color = '#8888aa';
+        btnJoin.style.marginTop = '6px';
+        hint.textContent = 'El depósito registra tu entrada en el smart contract.';
+      } else if (hasContract && !hasWallet) {
+        btnDeposit.style.display = 'none';
+        btnJoin.textContent = '✅ Unirse a la sala →';
+        hint.textContent = 'Esta sala tiene contrato — conecta MetaMask para depositar 0.1 MON.';
+      } else {
+        btnDeposit.style.display = 'none';
+        btnJoin.textContent = '✅ Unirse a la sala →';
+        hint.textContent = '';
+      }
+    }
+
+    // Join directo sin contrato
+    async function joinDirect() {
       if (!requireLogin()) return;
       if (!foundRoomId) return;
       const msgEl = document.getElementById('joinMsg');
       msgEl.className='msg'; msgEl.style.display='none';
-      // If room has contract and user has wallet, show deposit flow
-      if (foundRoomContractAddress && currentUser.wallet) {
-        document.getElementById('depositPanel').style.display = 'block';
-        document.getElementById('btnJoinRoom').style.display = 'none';
-        return;
-      }
-      // Otherwise join directly (mock)
+      const btn = document.getElementById('btnJoinRoom');
+      btn.disabled = true; btn.textContent = '⏳ Uniéndose...';
       try {
-        const res = await fetch('/api/rooms/'+foundRoomId+'/join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUser.id}) });
+        const res = await fetch('/api/rooms/'+foundRoomId+'/join', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ userId: currentUser.id, nombre: currentUser.name })
+        });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error||'Error al unirse');
+        if (!res.ok) throw new Error(data.error || 'Error al unirse');
         window.location.href = 'room.html?roomId='+foundRoomId+'&userId='+currentUser.id;
-      } catch(err) { msgEl.textContent=err.message; msgEl.className='msg error'; }
+      } catch(err) {
+        btn.disabled = false; btn.textContent = '✅ Unirse a la sala →';
+        msgEl.textContent = err.message; msgEl.className = 'msg error';
+      }
     }
 
+    // Join con depósito en el smart contract
     async function depositAndJoin() {
+      if (!requireLogin()) return;
       if (!foundRoomId || !foundRoomContractAddress) return;
+      if (!window.ethereum) {
+        alert('MetaMask no está instalado o no está disponible en este dispositivo.');
+        return;
+      }
       const btn = document.getElementById('btnDeposit');
+      const msgEl = document.getElementById('joinMsg');
       btn.disabled = true;
-      btn.textContent = '⏳ Confirma en MetaMask...';
+      btn.textContent = '⏳ Abre MetaMask...';
+      msgEl.className='msg'; msgEl.style.display='none';
       try {
-        if (!ethersProvider) {
-          ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-          ethersSigner = ethersProvider.getSigner();
+        // Inicializar provider/signer
+        ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+        await ethersProvider.send('eth_requestAccounts', []);
+        ethersSigner = ethersProvider.getSigner();
+
+        // Verificar red Monad
+        const network = await ethersProvider.getNetwork();
+        if (network.chainId !== 10143) {
+          try {
+            await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{chainId:'0x279F'}] });
+            ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+            ethersSigner = ethersProvider.getSigner();
+          } catch(e) {
+            await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{
+              chainId:'0x279F', chainName:'Monad Testnet',
+              nativeCurrency:{name:'Monad',symbol:'MON',decimals:18},
+              rpcUrls:['https://testnet-rpc.monad.xyz'],
+              blockExplorerUrls:['https://testnet.monadexplorer.com']
+            }]});
+            ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+            ethersSigner = ethersProvider.getSigner();
+          }
         }
-        const contract = new ethers.Contract(foundRoomContractAddress, ZENTO_CONTRACTS.room.abi, ethersSigner);
-        const tx = await contract.deposit({ value: ethers.utils.parseEther("0.1") });
-        btn.textContent = '⏳ Esperando confirmación...';
+
+        btn.textContent = '⏳ Confirma el depósito...';
+        const contract = new ethers.Contract(
+          foundRoomContractAddress,
+          ZENTO_CONTRACTS.room.abi,
+          ethersSigner
+        );
+
+        const tx = await contract.deposit({ value: ethers.utils.parseEther('0.1') });
+        btn.textContent = '⏳ Confirmando en la red...';
         await tx.wait();
-        // Now join via API
-        const res = await fetch('/api/rooms/'+foundRoomId+'/join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUser.id}) });
+
+        // Unirse en el backend también
+        const res = await fetch('/api/rooms/'+foundRoomId+'/join', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ userId: currentUser.id, nombre: currentUser.name })
+        });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error||'Error al unirse');
-        window.location.href = 'room.html?roomId='+foundRoomId+'&userId='+currentUser.id;
+        if (!res.ok) throw new Error(data.error || 'Error al registrar en sala');
+
+        msgEl.textContent = '✅ Depósito exitoso — tx: ' + tx.hash.slice(0,10) + '...';
+        msgEl.className = 'msg success';
+        setTimeout(() => {
+          window.location.href = 'room.html?roomId='+foundRoomId+'&userId='+currentUser.id;
+        }, 1200);
       } catch(e) {
         btn.disabled = false;
-        btn.innerHTML = '💰 Depositar con MetaMask';
-        const msgEl = document.getElementById('joinMsg');
-        msgEl.textContent = 'Error: ' + (e.reason || e.message);
+        btn.innerHTML = '💰 Depositar 0.1 MON y unirse';
+        const msg = e.code === 4001 ? 'Cancelaste la transacción en MetaMask.' : (e.reason || e.message || 'Error desconocido');
+        msgEl.textContent = 'Error: ' + msg;
         msgEl.className = 'msg error';
       }
     }
