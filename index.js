@@ -1,4 +1,4 @@
-try { require('dotenv').config(); } catch(e) { /* .env opcional en producción */ }
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -16,17 +16,13 @@ app.use('/api/webhook',    require('./src/routes/webhook'));
 app.use('/api/rooms',      require('./src/routes/rooms'));
 app.use('/api/users',      require('./src/routes/users'));
 
-// Health check
-app.get('/api/health', (req, res) => res.json({ ok: true, env: process.env.NODE_ENV || 'dev' }));
+app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-// SPA fallback → index.html para rutas no encontradas
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
-
-// Solo escuchar si no estamos en Vercel serverless
 if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => console.log(`Zento server running on port ${PORT}`));
 }
