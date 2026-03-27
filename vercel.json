@@ -11,6 +11,8 @@
           "lobby.html",
           "room.html",
           "trivia.html",
+          "deploy.html",
+          "contracts.js",
           "src/**"
         ]
       }

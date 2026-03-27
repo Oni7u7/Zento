@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zento — Deploy Contratos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="contracts.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0a0a0f; color:#f0f0f0; font-family:"Syne",sans-serif; min-height:100vh; padding:40px 20px; }
+    .page { max-width:700px; margin:0 auto; }
+    .logo { font-size:28px; font-weight:800; background:linear-gradient(135deg,#00ff88,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:8px; }
+    h2 { font-size:20px; margin-bottom:4px; }
+    .sub { color:#8888aa; font-size:14px; margin-bottom:36px; }
+    .card { background:#12121a; border:1px solid #1e1e2e; border-radius:16px; padding:28px; margin-bottom:24px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+    .card-desc { font-size:13px; color:#8888aa; line-height:1.6; margin-bottom:20px; }
+    .btn { width:100%; padding:14px; border:none; border-radius:10px; font-family:"Syne",sans-serif; font-weight:700; font-size:15px; cursor:pointer; transition:opacity 0.2s; }
+    .btn-purple { background:#7c3aed; color:#fff; }
+    .btn-green  { background:#00ff88; color:#0a0a0f; }
+    .btn:hover  { opacity:0.85; }
+    .btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .status { margin-top:14px; padding:14px; border-radius:10px; font-size:13px; line-height:1.6; display:none; }
+    .status.info    { display:block; background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.3); color:#c4b5fd; }
+    .status.success { display:block; background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); color:#00ff88; }
+    .status.error   { display:block; background:rgba(255,68,102,0.1); border:1px solid rgba(255,68,102,0.3); color:#ff4466; }
+    .addr-box { font-family:monospace; font-size:13px; background:#0a0a0f; border:1px solid #1e1e2e; border-radius:8px; padding:10px 14px; margin-top:10px; word-break:break-all; }
+    .addr-label { font-size:11px; color:#8888aa; margin-bottom:4px; }
+    .tag-deployed { display:inline-block; background:rgba(0,255,136,0.15); color:#00ff88; border-radius:20px; padding:3px 12px; font-size:12px; }
+    .tag-pending  { display:inline-block; background:rgba(124,58,237,0.15); color:#a78bfa; border-radius:20px; padding:3px 12px; font-size:12px; }
+    .connect-bar { display:flex; align-items:center; gap:12px; background:#12121a; border:1px solid #1e1e2e; border-radius:12px; padding:16px 20px; margin-bottom:24px; }
+    .w-dot { width:9px; height:9px; border-radius:50%; background:#8888aa; flex-shrink:0; }
+    .w-dot.on { background:#00ff88; box-shadow:0 0 6px #00ff88; }
+    a { color:#7c3aed; }
+    .contracts-summary { background:#0a0f1a; border:1px solid #00ff88; border-radius:12px; padding:20px; margin-top:20px; display:none; }
+    .contracts-summary.show { display:block; }
+    .cs-title { font-size:14px; font-weight:700; color:#00ff88; margin-bottom:12px; }
+    .cs-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #1e1e2e; }
+    .cs-row:last-child { border-bottom:none; }
+    .btn-back { padding:10px 22px; background:none; border:1px solid #1e1e2e; color:#8888aa; border-radius:8px; font-family:"Syne",sans-serif; font-size:14px; cursor:pointer; }
+    .btn-back:hover { border-color:#7c3aed; color:#c4b5fd; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="logo">ZENTO</div>
+  <h2>Deploy de Contratos Inteligentes</h2>
+  <p class="sub">Despliega los contratos de Zento en <strong>Monad Testnet</strong> usando tu MetaMask.</p>
+
+  <!-- Conexión wallet -->
+  <div class="connect-bar">
+    <div class="w-dot" id="wDot"></div>
+    <div style="flex:1">
+      <div id="wStatus" style="font-size:14px;color:#8888aa;">Wallet no conectada</div>
+      <div id="wAddr" style="font-family:monospace;font-size:12px;color:#8888aa;margin-top:2px;"></div>
+    </div>
+    <button class="btn btn-purple" id="btnConnect" style="width:auto;padding:10px 20px;" onclick="connectWallet()">Conectar MetaMask</button>
+  </div>
+
+  <!-- Contrato 1: ZentoVault -->
+  <div class="card">
+    <div class="card-title">
+      🏦 ZentoVault
+      <span id="vaultTag" class="tag-pending">Pendiente</span>
+    </div>
+    <p class="card-desc">
+      Custodia los depósitos de los jugadores en MON (token nativo de Monad). Al terminar la partida, devuelve el depósito a cada jugador y transfiere el yield al ganador. Funciones clave: <code>createRoom</code>, <code>deposit</code>, <code>distribute</code>.
+    </p>
+    <button class="btn btn-purple" id="btnVault" onclick="deployVault()" disabled>Desplegar ZentoVault →</button>
+    <div class="status" id="vaultStatus"></div>
+    <div id="vaultAddrBox" style="display:none">
+      <div class="addr-label">Dirección del contrato</div>
+      <div class="addr-box" id="vaultAddr"></div>
+      <div style="margin-top:8px;font-size:12px;">
+        <a id="vaultExplorer" href="#" target="_blank" style="color:#00ff88;">Ver en Monad Explorer →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contrato 2: ZentoLeaderboard -->
+  <div class="card">
+    <div class="card-title">
+      🏆 ZentoLeaderboard
+      <span id="lbTag" class="tag-pending">Pendiente</span>
+    </div>
+    <p class="card-desc">
+      Registra los scores de cada jugador en cadena al terminar la trivia. Determina al ganador de forma inmutable. Emite eventos <code>ScoreSubmitted</code> y <code>WinnerDeclared</code> que quedan en el histórico de la blockchain.
+    </p>
+    <button class="btn btn-purple" id="btnLb" onclick="deployLeaderboard()" disabled>Desplegar ZentoLeaderboard →</button>
+    <div class="status" id="lbStatus"></div>
+    <div id="lbAddrBox" style="display:none">
+      <div class="addr-label">Dirección del contrato</div>
+      <div class="addr-box" id="lbAddr"></div>
+      <div style="margin-top:8px;font-size:12px;">
+        <a id="lbExplorer" href="#" target="_blank" style="color:#00ff88;">Ver en Monad Explorer →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen post-deploy -->
+  <div class="contracts-summary" id="summary">
+    <div class="cs-title">✅ Contratos desplegados en Monad Testnet</div>
+    <div class="cs-row">
+      <span>ZentoVault</span>
+      <span class="tag-deployed" id="sumVault">—</span>
+    </div>
+    <div class="cs-row">
+      <span>ZentoLeaderboard</span>
+      <span class="tag-deployed" id="sumLb">—</span>
+    </div>
+    <div style="margin-top:16px;font-size:13px;color:#8888aa;">Las direcciones se guardaron en tu navegador. La app las usará automáticamente.</div>
+    <div style="margin-top:14px;display:flex;gap:10px;">
+      <button class="btn-back" onclick="window.location.href='index.html'">← Ir al Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const MONAD = { chainId:'0x279F', chainName:'Monad Testnet', nativeCurrency:{name:'Monad',symbol:'MON',decimals:18}, rpcUrls:['https://testnet-rpc.monad.xyz'], blockExplorerUrls:['https://testnet.monadexplorer.com'] };
+  const EXPLORER = 'https://testnet.monadexplorer.com/address/';
+
+  let provider, signer, walletAddr;
+
+  // Al cargar, verificar si ya hay contratos desplegados
+  window.addEventListener('load', () => {
+    const v = localStorage.getItem('zento_vault_addr');
+    const l = localStorage.getItem('zento_leaderboard_addr');
+    if (v) showDeployed('vault', v);
+    if (l) showDeployed('lb', l);
+    if (v && l) showSummary(v, l);
+  });
+
+  async function connectWallet() {
+    if (!window.ethereum) { alert('Instala MetaMask'); return; }
+    try {
+      try { await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{chainId:MONAD.chainId}] }); }
+      catch(e) { if (e.code===4902) await window.ethereum.request({ method:'wallet_addEthereumChain', params:[MONAD] }); else throw e; }
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+      signer = provider.getSigner();
+      walletAddr = await signer.getAddress();
+
+      document.getElementById('wDot').classList.add('on');
+      document.getElementById('wStatus').textContent = 'Conectado a Monad Testnet';
+      document.getElementById('wStatus').style.color = '#00ff88';
+      document.getElementById('wAddr').textContent = walletAddr;
+      document.getElementById('btnConnect').textContent = '✅ Conectado';
+      document.getElementById('btnConnect').disabled = true;
+
+      // Habilitar botones de deploy
+      document.getElementById('btnVault').disabled = false;
+      document.getElementById('btnLb').disabled = false;
+    } catch(e) { alert('Error: ' + e.message); }
+  }
+
+  async function deployVault() {
+    const btn = document.getElementById('btnVault');
+    const st  = document.getElementById('vaultStatus');
+    btn.disabled = true;
+    setStatus('vaultStatus', 'info', '⏳ Desplegando ZentoVault... Confirma en MetaMask.');
+    try {
+      const factory = new ethers.ContractFactory(ZENTO_CONTRACTS.vault.abi, ZENTO_CONTRACTS.vault.bytecode, signer);
+      const contract = await factory.deploy();
+      setStatus('vaultStatus', 'info', `⏳ Transacción enviada. Esperando confirmación...<br><small>Tx: ${contract.deployTransaction.hash}</small>`);
+      await contract.deployed();
+      const addr = contract.address;
+      localStorage.setItem('zento_vault_addr', addr);
+      showDeployed('vault', addr);
+      setStatus('vaultStatus', 'success', `✅ ZentoVault desplegado correctamente.`);
+      checkBothDeployed();
+    } catch(e) {
+      setStatus('vaultStatus', 'error', '❌ Error: ' + e.message);
+      btn.disabled = false;
+    }
+  }
+
+  async function deployLeaderboard() {
+    const btn = document.getElementById('btnLb');
+    btn.disabled = true;
+    setStatus('lbStatus', 'info', '⏳ Desplegando ZentoLeaderboard... Confirma en MetaMask.');
+    try {
+      const factory = new ethers.ContractFactory(ZENTO_CONTRACTS.leaderboard.abi, ZENTO_CONTRACTS.leaderboard.bytecode, signer);
+      const contract = await factory.deploy();
+      setStatus('lbStatus', 'info', `⏳ Transacción enviada. Esperando confirmación...<br><small>Tx: ${contract.deployTransaction.hash}</small>`);
+      await contract.deployed();
+      const addr = contract.address;
+      localStorage.setItem('zento_leaderboard_addr', addr);
+      showDeployed('lb', addr);
+      setStatus('lbStatus', 'success', `✅ ZentoLeaderboard desplegado correctamente.`);
+      checkBothDeployed();
+    } catch(e) {
+      setStatus('lbStatus', 'error', '❌ Error: ' + e.message);
+      btn.disabled = false;
+    }
+  }
+
+  function showDeployed(key, addr) {
+    const prefix = key === 'vault' ? 'vault' : 'lb';
+    document.getElementById(prefix+'Tag').textContent = '✅ Desplegado';
+    document.getElementById(prefix+'Tag').className = 'tag-deployed';
+    document.getElementById(prefix+'Addr').textContent = addr;
+    document.getElementById(prefix+'AddrBox').style.display = 'block';
+    document.getElementById(prefix+'Explorer').href = EXPLORER + addr;
+  }
+
+  function checkBothDeployed() {
+    const v = localStorage.getItem('zento_vault_addr');
+    const l = localStorage.getItem('zento_leaderboard_addr');
+    if (v && l) showSummary(v, l);
+  }
+
+  function showSummary(v, l) {
+    document.getElementById('sumVault').textContent = v.slice(0,6)+'...'+v.slice(-4);
+    document.getElementById('sumLb').textContent    = l.slice(0,6)+'...'+l.slice(-4);
+    document.getElementById('summary').classList.add('show');
+  }
+
+  function setStatus(id, type, html) {
+    const el = document.getElementById(id);
+    el.className = 'status ' + type;
+    el.innerHTML = html;
+  }
+</script>
+</body>
+</html>

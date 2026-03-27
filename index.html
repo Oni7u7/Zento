@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zento — Juega. Compite. Gana el Rendimiento.</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="contracts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; }
@@ -157,8 +159,17 @@
       <!-- Botón login / logout -->
       <button class="btn-login" id="btnLoginToggle">Iniciar sesión</button>
       <button class="btn-logout" id="btnLogout" style="display:none" onclick="logout()">Salir</button>
+      <a href="deploy.html" id="deployBtn" style="display:none; padding:7px 14px; background:rgba(124,58,237,0.15); border:1px solid #7c3aed; color:#a78bfa; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;" title="Contratos en Monad Testnet">⛓ Contratos</a>
     </div>
   </nav>
+
+  <!-- Contracts badge (cuando están desplegados) -->
+  <div id="contractsBanner" style="display:none; background:#0a0f1a; border-bottom:1px solid rgba(0,255,136,0.2); padding:8px 40px; font-size:12px; color:#8888aa; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <span style="color:#00ff88; font-weight:700;">⛓ On-chain</span>
+    <span>Vault: <span id="bannerVault" style="font-family:monospace;color:#f0f0f0;"></span></span>
+    <span>Leaderboard: <span id="bannerLb" style="font-family:monospace;color:#f0f0f0;"></span></span>
+    <a href="https://testnet.monadexplorer.com" target="_blank" style="color:#7c3aed; margin-left:auto;">Explorar →</a>
+  </div>
 
   <!-- ── HERO ── -->
   <section class="hero">
@@ -331,6 +342,7 @@
       if (currentUser.id) {
         btnLogin.style.display = 'none';
         btnLogout.style.display = 'block';
+        document.getElementById('deployBtn').style.display = 'block';
         if (currentUser.wallet) {
           wBadge.classList.add('show');
           document.getElementById('navWalletAddr').textContent = currentUser.wallet.slice(0,6)+'...'+currentUser.wallet.slice(-4);
@@ -343,6 +355,7 @@
       } else {
         btnLogin.style.display = 'block';
         btnLogout.style.display = 'none';
+        document.getElementById('deployBtn').style.display = 'none';
         wBadge.classList.remove('show');
         uBadge.classList.remove('show');
       }
@@ -571,6 +584,20 @@
     document.getElementById('roomCreatedModal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('roomCreatedModal')) document.getElementById('roomCreatedModal').classList.remove('show');
     });
+
+    // Mostrar contratos si ya están desplegados
+    function showContractsBanner() {
+      const v = localStorage.getItem('zento_vault_addr');
+      const l = localStorage.getItem('zento_leaderboard_addr');
+      if (v || l) {
+        const banner = document.getElementById('contractsBanner');
+        banner.style.display = 'flex';
+        if (v) document.getElementById('bannerVault').textContent = v.slice(0,6)+'...'+v.slice(-4);
+        if (l) document.getElementById('bannerLb').textContent    = l.slice(0,6)+'...'+l.slice(-4);
+      }
+      if (currentUser.id) document.getElementById('deployBtn').style.display = 'block';
+    }
+    showContractsBanner();
 
     init();
   </script>
