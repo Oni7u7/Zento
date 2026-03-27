@@ -283,6 +283,250 @@
 .status-completed { background: #14532d; color: #22c55e; }
 .status-cancelled { background: #450a0a; color: #f87171; }
 
+/* ── Header brand ── */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #836EF9;
+  box-shadow: 0 0 8px #836EF9;
+}
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.brand-tag {
+  font-size: 11px;
+  color: #555;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.btn-connect-header {
+  padding: 9px 20px;
+  background: #836EF9;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-connect-header:hover:not(:disabled) {
+  background: #9b85ff;
+}
+
+.btn-connect-header:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Landing ── */
+.landing {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+  padding: 60px 16px 100px;
+}
+
+.landing-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.hero-title {
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -1px;
+}
+
+.hero-accent {
+  color: #836EF9;
+}
+
+.hero-sub {
+  max-width: 520px;
+  font-size: 17px;
+  color: #888;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.btn-hero-cta {
+  padding: 15px 36px;
+  background: #836EF9;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  margin-top: 8px;
+}
+
+.btn-hero-cta:hover:not(:disabled) {
+  background: #9b85ff;
+  transform: translateY(-1px);
+}
+
+.btn-hero-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Feature cards ── */
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.feature-card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.feature-card:hover {
+  border-color: #836EF9;
+}
+
+.feature-icon {
+  font-size: 28px;
+}
+
+.feature-card h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* ── Steps ── */
+.landing-steps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.steps-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.steps-list {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px 20px;
+  min-width: 160px;
+}
+
+.step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #836EF9;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.step-text strong {
+  font-size: 13px;
+  color: #fff;
+}
+
+.step-text span {
+  font-size: 11px;
+  color: #555;
+}
+
+.step-arrow {
+  color: #333;
+  font-size: 20px;
+  font-weight: 300;
+}
+
+/* ── Final CTA ── */
+.landing-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.cta-text {
+  font-size: 20px;
+  color: #888;
+  margin: 0;
+}
+
 /* ── Wallet connect page ── */
 .wallet-page {
   min-height: 100vh;

@@ -75,50 +75,127 @@ function App() {
 
   const shortAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : ''
 
-  if (!account) {
-    return (
-      <div className="wallet-page">
-        <div className="wallet-card">
-          <div className="wallet-logo">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-              <rect width="48" height="48" rx="12" fill="#F6851B"/>
-              <path d="M38 12L27.2 19.8L29.3 15.1L38 12Z" fill="#E2761B"/>
-              <path d="M10 12L20.7 19.9L18.7 15.1L10 12Z" fill="#E4761B"/>
-              <path d="M34.3 30.9L31.4 35.3L37.4 37L39.1 31L34.3 30.9Z" fill="#E4761B"/>
-              <path d="M8.9 31L10.6 37L16.6 35.3L13.7 30.9L8.9 31Z" fill="#E4761B"/>
-              <path d="M16.3 22.3L14.6 24.9L20.5 25.2L20.3 18.8L16.3 22.3Z" fill="#E4761B"/>
-              <path d="M31.7 22.3L27.6 18.7L27.5 25.2L33.4 24.9L31.7 22.3Z" fill="#E4761B"/>
-              <path d="M16.6 35.3L20.1 33.5L17.1 31L16.6 35.3Z" fill="#E4761B"/>
-              <path d="M27.9 33.5L31.4 35.3L30.9 31L27.9 33.5Z" fill="#E4761B"/>
-            </svg>
-          </div>
-          <h1>Conecta tu Wallet</h1>
-          <p className="wallet-subtitle">Conecta MetaMask para continuar</p>
-          <button className="btn-connect" onClick={connectWallet} disabled={loading}>
-            {loading ? 'Conectando...' : 'Conectar MetaMask'}
-          </button>
-          {error && <p className="wallet-error">{error}</p>}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="app-connected">
-      {/* Header wallet */}
+      {/* ── Header ── */}
       <header className="wallet-header">
-        <div className="wallet-header-info">
-          <span className="dot connected" />
-          <span className="wallet-header-address">{shortAddress(account)}</span>
-          <span className="wallet-header-balance">{balance ?? '...'} <strong>MON</strong></span>
-          <span className="wallet-header-network">Monad Testnet</span>
+        <div className="header-brand">
+          <span className="brand-dot" />
+          <span className="brand-name">Zento</span>
+          <span className="brand-tag">Monad Testnet</span>
         </div>
-        <button className="btn-disconnect" onClick={disconnectWallet}>Desconectar</button>
+
+        <div className="header-right">
+          {account ? (
+            <div className="wallet-header-info">
+              <span className="dot connected" />
+              <span className="wallet-header-address">{shortAddress(account)}</span>
+              <span className="wallet-header-balance">{balance ?? '...'} <strong>MON</strong></span>
+              <button className="btn-disconnect" onClick={disconnectWallet}>Desconectar</button>
+            </div>
+          ) : (
+            <button className="btn-connect-header" onClick={connectWallet} disabled={loading}>
+              {loading ? 'Conectando...' : 'Conectar Wallet'}
+            </button>
+          )}
+        </div>
       </header>
 
-      {/* Ramp Panel */}
+      {/* ── Main content ── */}
       <main className="app-main">
-        <RampPanel account={account} />
+        {account ? (
+          /* ── Ramp panel cuando hay wallet conectada ── */
+          <RampPanel account={account} />
+        ) : (
+          /* ── Landing / info cuando no hay wallet ── */
+          <div className="landing">
+            {/* Hero */}
+            <section className="landing-hero">
+              <h1 className="hero-title">
+                Invierte en CETES<br />
+                <span className="hero-accent">desde Monad Testnet</span>
+              </h1>
+              <p className="hero-sub">
+                Convierte MXN a CETES tokenizados en segundos usando tu wallet de Monad.
+                On-ramp y off-ramp directo, sin intermediarios, sin complicaciones.
+              </p>
+              <button className="btn-hero-cta" onClick={connectWallet} disabled={loading}>
+                {loading ? 'Conectando...' : '🚀 Empezar ahora — Conecta tu Wallet'}
+              </button>
+              {error && <p className="wallet-error" style={{maxWidth: 420, marginTop: 12}}>{error}</p>}
+            </section>
+
+            {/* Features */}
+            <section className="landing-features">
+              <div className="feature-card">
+                <div className="feature-icon">🏦</div>
+                <h3>On-Ramp</h3>
+                <p>Deposita MXN desde tu cuenta bancaria y recibe CETES en tu wallet de Monad en minutos.</p>
+              </div>
+              <div className="feature-card">
+                <div className="feature-icon">💸</div>
+                <h3>Off-Ramp</h3>
+                <p>Convierte tus CETES de vuelta a MXN directo a tu CLABE bancaria cuando quieras.</p>
+              </div>
+              <div className="feature-card">
+                <div className="feature-icon">📈</div>
+                <h3>Rendimiento</h3>
+                <p>CETES son instrumentos del gobierno mexicano. Tu capital genera rendimiento mientras esperas.</p>
+              </div>
+              <div className="feature-card">
+                <div className="feature-icon">⚡</div>
+                <h3>Monad Testnet</h3>
+                <p>Rapidez y bajas comisiones. Prueba el flujo completo en testnet antes de ir a producción.</p>
+              </div>
+            </section>
+
+            {/* How it works */}
+            <section className="landing-steps">
+              <h2 className="steps-title">¿Cómo funciona?</h2>
+              <div className="steps-list">
+                <div className="step">
+                  <div className="step-num">1</div>
+                  <div className="step-text">
+                    <strong>Conecta tu wallet</strong>
+                    <span>Vincula MetaMask con Monad Testnet</span>
+                  </div>
+                </div>
+                <div className="step-arrow">→</div>
+                <div className="step">
+                  <div className="step-num">2</div>
+                  <div className="step-text">
+                    <strong>Elige monto</strong>
+                    <span>Ingresa cuántos MXN quieres invertir</span>
+                  </div>
+                </div>
+                <div className="step-arrow">→</div>
+                <div className="step">
+                  <div className="step-num">3</div>
+                  <div className="step-text">
+                    <strong>Obtén cotización</strong>
+                    <span>Ve exactamente cuántos CETES recibirás</span>
+                  </div>
+                </div>
+                <div className="step-arrow">→</div>
+                <div className="step">
+                  <div className="step-num">4</div>
+                  <div className="step-text">
+                    <strong>Confirma la orden</strong>
+                    <span>Tu CLABE recibe los fondos en minutos</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Final CTA */}
+            <section className="landing-cta">
+              <p className="cta-text">Listo para empezar?</p>
+              <button className="btn-hero-cta" onClick={connectWallet} disabled={loading}>
+                {loading ? 'Conectando...' : 'Conectar Wallet y Comenzar'}
+              </button>
+            </section>
+          </div>
+        )}
       </main>
     </div>
   )
