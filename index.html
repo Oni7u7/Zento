@@ -8,81 +8,571 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0f; color: #f0f0f0; font-family: "Syne", sans-serif; min-height: 100vh; }
-    a { color: #00ff88; text-decoration: none; }
 
-    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1e1e2e; }
-    .logo { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .btn-enter { background: #00ff88; color: #0a0a0f; border: none; padding: 10px 24px; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
-    .btn-enter:hover { opacity: 0.85; }
+    /* ── NAVBAR ── */
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 40px; border-bottom: 1px solid #1e1e2e; position: sticky; top: 0; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); z-index: 10; }
+    .logo { font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #00ff88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; cursor: pointer; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
 
-    .hero { text-align: center; padding: 100px 20px 60px; max-width: 800px; margin: 0 auto; }
-    .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.15; margin-bottom: 20px; }
-    .hero p { font-size: 18px; color: #8888aa; margin-bottom: 40px; line-height: 1.6; }
-    .yield-counter { font-family: monospace; font-size: 56px; color: #00ff88; margin-bottom: 40px; text-shadow: 0 0 30px rgba(0,255,136,0.3); }
-    .btn-cta { background: linear-gradient(135deg, #00ff88, #00cc6a); color: #0a0a0f; border: none; padding: 16px 40px; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 18px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.3); }
+    /* Wallet badge (cuando está logueado con wallet) */
+    .wallet-badge { display: none; align-items: center; gap: 8px; background: #0a0f1a; border: 1px solid #00ff88; border-radius: 8px; padding: 7px 14px; }
+    .wallet-badge.show { display: flex; }
+    .w-dot { width: 7px; height: 7px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+    .w-addr { font-family: monospace; font-size: 13px; color: #00ff88; }
+    .w-net  { font-size: 11px; color: #8888aa; }
 
-    .steps-section { padding: 80px 40px; max-width: 1000px; margin: 0 auto; }
-    .steps-section h2 { text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 50px; }
-    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
-    .step { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px 30px; text-align: center; transition: border-color 0.3s; }
-    .step:hover { border-color: #7c3aed; }
-    .step-icon { font-size: 48px; margin-bottom: 16px; }
-    .step h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #00ff88; }
-    .step p { font-size: 14px; color: #8888aa; line-height: 1.6; }
+    /* User badge (cuando está logueado con email) */
+    .user-badge { display: none; align-items: center; gap: 8px; }
+    .user-badge.show { display: flex; }
+    .u-name { font-size: 14px; color: #f0f0f0; }
 
-    .footer { text-align: center; padding: 40px 20px; color: #8888aa; font-size: 13px; border-top: 1px solid #1e1e2e; margin-top: 60px; }
+    .btn-login  { padding: 9px 22px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+    .btn-login:hover { opacity: 0.85; }
+    .btn-logout { padding: 7px 14px; background: none; border: 1px solid #1e1e2e; color: #8888aa; border-radius: 8px; font-family: "Syne", sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .btn-logout:hover { border-color: #ff4466; color: #ff4466; }
+
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 70px 20px 50px; }
+    .hero h1 { font-size: clamp(32px, 6vw, 58px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 16px; }
+    .hero h1 span { color: #00ff88; }
+    .hero p  { font-size: 17px; color: #8888aa; max-width: 500px; margin: 0 auto 32px; line-height: 1.7; }
+    .yield-ticker { display: inline-flex; align-items: center; gap: 10px; background: #0a0f1a; border: 1px solid #00ff88; border-radius: 30px; padding: 10px 22px; margin-bottom: 32px; }
+    .yield-ticker span:first-child { font-size: 12px; color: #8888aa; }
+    .yield-ticker .num { font-family: monospace; font-size: 22px; color: #00ff88; font-weight: 700; }
+
+    /* ── STEPS ── */
+    .steps { display: flex; justify-content: center; gap: 0; max-width: 800px; margin: 0 auto 60px; flex-wrap: wrap; }
+    .step { flex: 1; min-width: 160px; text-align: center; padding: 20px 16px; position: relative; }
+    .step:not(:last-child)::after { content: '→'; position: absolute; right: -8px; top: 32px; color: #1e1e2e; font-size: 20px; }
+    .step-icon { font-size: 28px; margin-bottom: 10px; }
+    .step h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .step p  { font-size: 12px; color: #8888aa; line-height: 1.5; }
+
+    /* ── MAIN CONTENT ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+    .panel { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 28px; }
+    .panel h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 5px; }
+    .form-group input, .form-group select { width: 100%; padding: 11px 14px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 8px; color: #f0f0f0; font-size: 14px; font-family: "Syne", sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color: #7c3aed; }
+    .form-group select option { background: #0a0a0f; }
+
+    .btn-primary   { width: 100%; padding: 13px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { width: 100%; padding: 12px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+    .btn-secondary:hover { opacity: 0.85; }
+    .input-big { font-size: 22px !important; text-align: center; letter-spacing: 5px; font-family: monospace !important; text-transform: uppercase; }
+
+    .room-info { background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 10px; padding: 18px; margin-top: 14px; display: none; }
+    .room-info h3 { font-size: 15px; margin-bottom: 8px; }
+    .room-info .detail { display: flex; justify-content: space-between; font-size: 13px; color: #8888aa; padding: 3px 0; }
+    .room-info .detail span:last-child { color: #f0f0f0; }
+
+    .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
+    .msg.error   { display: block; background: rgba(255,68,102,0.1); color: #ff4466; border: 1px solid rgba(255,68,102,0.2); }
+    .msg.success { display: block; background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); }
+
+    /* Active rooms */
+    .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .room-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; cursor: pointer; transition: border-color 0.2s; }
+    .room-card:hover { border-color: #7c3aed; }
+    .room-card h3 { font-size: 15px; margin-bottom: 6px; }
+    .room-card .meta { font-size: 12px; color: #8888aa; margin-bottom: 8px; }
+    .room-card .code { font-family: monospace; color: #00ff88; font-size: 14px; letter-spacing: 2px; }
+    .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+    .chip-waiting  { background: rgba(0,255,136,0.1); color: #00ff88; }
+    .chip-playing  { background: rgba(124,58,237,0.1); color: #7c3aed; }
+    .chip-finished { background: rgba(136,136,170,0.1); color: #8888aa; }
+
+    /* Modal overlay */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #12121a; border: 1px solid #1e1e2e; border-radius: 18px; padding: 40px; width: 100%; max-width: 420px; }
+    .modal-close { float: right; background: none; border: none; color: #8888aa; font-size: 22px; cursor: pointer; line-height: 1; margin-top: -8px; }
+    .modal-close:hover { color: #fff; }
+    .modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 28px; }
+
+    /* Wallet connect in modal */
+    .btn-wallet { width: 100%; padding: 15px; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; border: none; border-radius: 12px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: opacity 0.2s, transform 0.15s; margin-bottom: 8px; }
+    .btn-wallet:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-wallet:disabled { opacity: 0.6; cursor: not-allowed; }
+    .connected-wallet-row { display: none; align-items: center; gap: 10px; background: #0a0f1a; border: 1px solid #00ff88; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+    .connected-wallet-row.show { display: flex; }
+    .btn-enter-wallet { width: 100%; padding: 14px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 10px; font-family: "Syne", sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; display: none; transition: opacity 0.2s; }
+    .btn-enter-wallet.show { display: block; }
+    .btn-enter-wallet:hover { opacity: 0.85; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #8888aa; font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #1e1e2e; }
+
+    .tabs { display: flex; border-bottom: 1px solid #1e1e2e; margin-bottom: 20px; }
+    .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 13px; color: #8888aa; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: "Syne", sans-serif; background: none; border-top: none; border-left: none; border-right: none; }
+    .tab.active { color: #00ff88; border-bottom-color: #00ff88; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-group-sm { margin-bottom: 12px; }
+    .form-group-sm label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 4px; }
+    .form-group-sm input { width: 100%; padding: 10px 13px; background: #0a0a0f; border: 1px solid #1e1e2e; border-radius: 8px; color: #f0f0f0; font-size: 14px; font-family: "Syne", sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-group-sm input:focus { border-color: #7c3aed; }
+    .btn-form { width: 100%; padding: 12px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 4px; transition: opacity 0.2s; }
+    .btn-form:hover { opacity: 0.85; }
+    .form-err { color: #ff4466; font-size: 12px; margin-top: 6px; display: none; }
+
+    /* Room created modal */
+    .room-code-display { font-family: monospace; font-size: 48px; color: #00ff88; letter-spacing: 8px; margin: 16px 0; text-shadow: 0 0 20px rgba(0,255,136,0.3); text-align: center; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+    .btn-copy { background: none; border: 1px solid #1e1e2e; color: #8888aa; padding: 10px 18px; border-radius: 8px; font-family: "Syne", sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .btn-copy:hover { border-color: #00ff88; color: #00ff88; }
+    .btn-go { padding: 10px 18px; background: #00ff88; color: #0a0a0f; border: none; border-radius: 8px; font-family: "Syne", sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; }
 
     @media (max-width: 768px) {
-      .hero h1 { font-size: 32px; }
-      .yield-counter { font-size: 36px; }
-      .steps { grid-template-columns: 1fr; }
-      .navbar { padding: 16px 20px; }
+      .columns { grid-template-columns: 1fr; }
+      .navbar { padding: 14px 20px; }
+      .step:not(:last-child)::after { display: none; }
     }
   </style>
 </head>
 <body>
+
+  <!-- ── NAVBAR ── -->
   <nav class="navbar">
-    <div class="logo">ZENTO</div>
-    <a href="login.html"><button class="btn-enter">Entrar</button></a>
+    <div class="logo" onclick="window.scrollTo(0,0)">ZENTO</div>
+    <div class="nav-right">
+      <!-- Wallet badge (logueado con wallet) -->
+      <div class="wallet-badge" id="navWalletBadge">
+        <span class="w-dot"></span>
+        <span class="w-addr" id="navWalletAddr"></span>
+        <span class="w-net">Monad</span>
+      </div>
+      <!-- User badge (logueado con email) -->
+      <div class="user-badge" id="navUserBadge">
+        <span style="font-size:18px;">👤</span>
+        <span class="u-name" id="navUserName"></span>
+      </div>
+      <!-- Botón login / logout -->
+      <button class="btn-login" id="btnLoginToggle">Iniciar sesión</button>
+      <button class="btn-logout" id="btnLogout" style="display:none" onclick="logout()">Salir</button>
+    </div>
   </nav>
 
+  <!-- ── HERO ── -->
   <section class="hero">
-    <h1>Juega. Compite. <span style="color:#00ff88">Gana el Rendimiento.</span></h1>
-    <p>Reta a tus amigos con CETES como colateral. El que más sabe se lleva el yield de todos.</p>
-    <div class="yield-counter" id="yieldCounter">$0.00 MXN</div>
-    <a href="login.html"><button class="btn-cta">Empezar a jugar</button></a>
+    <div class="yield-ticker">
+      <span>Yield simulado en vivo</span>
+      <span class="num" id="heroYield">$0.000000</span>
+      <span style="font-size:12px;color:#8888aa;">MXN</span>
+    </div>
+    <h1>Juega. Compite.<br><span>Gana el Rendimiento.</span></h1>
+    <p>Reta a tus amigos con CETES como colateral. El que más sabe se lleva el yield de todos. Tu capital siempre regresa.</p>
   </section>
 
-  <section class="steps-section">
-    <h2>¿Cómo funciona?</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-icon">💰</div>
-        <h3>Deposita</h3>
-        <p>Cada jugador deposita MXN. Se convierte en CETES automáticamente.</p>
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step"><div class="step-icon">💰</div><h3>Deposita</h3><p>Cada jugador pone MXN. Se convierte a CETES automáticamente.</p></div>
+    <div class="step"><div class="step-icon">🎮</div><h3>Compite</h3><p>Trivia financiera. 10 preguntas, 20 segundos cada una.</p></div>
+    <div class="step"><div class="step-icon">📈</div><h3>El pool rinde</h3><p>Mientras juegan, los CETES generan ~9% APY.</p></div>
+    <div class="step"><div class="step-icon">🏆</div><h3>Ganador lleva el yield</h3><p>El de mayor score se queda con el rendimiento. Todos recuperan su depósito.</p></div>
+  </div>
+
+  <!-- ── MAIN DASHBOARD ── -->
+  <div class="main">
+    <div class="columns">
+
+      <!-- Crear sala -->
+      <div class="panel">
+        <h2>🏠 Nueva sala</h2>
+        <form id="createForm">
+          <div class="form-group">
+            <label>Nombre de la sala</label>
+            <input type="text" id="roomName" placeholder="Trivia del viernes..." required>
+          </div>
+          <div class="form-group">
+            <label>Tipo de juego</label>
+            <select id="roomGame">
+              <option>Trivia Financiera</option>
+              <option>Cultura General</option>
+              <option>Mixto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monto de entrada (MXN)</label>
+            <input type="number" id="roomAmount" min="10" step="10" value="100">
+          </div>
+          <div class="form-group">
+            <label>Duración (días)</label>
+            <input type="number" id="roomDays" min="1" max="30" value="7">
+          </div>
+          <button type="submit" class="btn-primary">Crear sala →</button>
+          <div class="msg" id="createMsg"></div>
+        </form>
       </div>
-      <div class="step">
-        <div class="step-icon">🎮</div>
-        <h3>Compite</h3>
-        <p>Juega trivia financiera. 10 preguntas, 20 segundos cada una.</p>
-      </div>
-      <div class="step">
-        <div class="step-icon">🏆</div>
-        <h3>Gana el yield</h3>
-        <p>El de mayor score se lleva el rendimiento de todos. Tu capital siempre regresa.</p>
+
+      <!-- Unirse a sala -->
+      <div class="panel">
+        <h2>🔍 Unirse a sala</h2>
+        <div class="form-group">
+          <label>Código de sala</label>
+          <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6">
+        </div>
+        <button class="btn-secondary" onclick="searchRoom()">Buscar sala</button>
+
+        <div class="room-info" id="roomInfo">
+          <h3 id="ri-nombre"></h3>
+          <div class="detail"><span>Tipo</span><span id="ri-juego"></span></div>
+          <div class="detail"><span>Entrada</span><span id="ri-monto"></span></div>
+          <div class="detail"><span>Estado</span><span id="ri-estado"></span></div>
+          <div class="detail"><span>Jugadores</span><span id="ri-jugadores"></span></div>
+          <button class="btn-primary" style="margin-top:14px;" onclick="joinRoom()">Unirse →</button>
+          <div class="msg" id="joinMsg"></div>
+        </div>
+        <div class="msg" id="searchMsg"></div>
       </div>
     </div>
-  </section>
 
-  <footer class="footer">Zento © 2025 — Construido sobre Monad Testnet con Etherfuse</footer>
+    <!-- Salas activas -->
+    <div class="section-title">🎮 Salas activas</div>
+    <div class="rooms-grid" id="roomsGrid">
+      <div style="color:#8888aa;font-size:14px;">Cargando salas...</div>
+    </div>
+  </div>
+
+  <!-- ── MODAL LOGIN ── -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeLoginModal()">✕</button>
+      <h2>Entrar a Zento</h2>
+
+      <!-- Wallet -->
+      <button class="btn-wallet" id="btnConnectWallet" onclick="connectWallet()">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="6" fill="#F6851B"/><path d="M17 5L12.3 8.5L13.2 6.1L17 5Z" fill="#E2761B"/><path d="M5 5L9.6 8.6L8.8 6.1L5 5Z" fill="#E4761B"/></svg>
+        Conectar MetaMask
+      </button>
+      <div class="connected-wallet-row" id="connectedRow">
+        <span style="width:8px;height:8px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;display:inline-block;flex-shrink:0;"></span>
+        <span id="modalWalletAddr" style="font-family:monospace;font-size:13px;color:#00ff88;flex:1;"></span>
+        <span style="font-size:11px;color:#8888aa;">Monad Testnet</span>
+      </div>
+      <button class="btn-enter-wallet" id="btnEnterWallet" onclick="enterWithWallet()">⚡ Entrar con esta wallet</button>
+
+      <div class="divider">o con email</div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Iniciar sesión</button>
+        <button class="tab" data-tab="register">Registrarse</button>
+      </div>
+
+      <div class="tab-content active" id="tab-login">
+        <form onsubmit="loginEmail(event)">
+          <div class="form-group-sm"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@email.com"></div>
+          <div class="form-group-sm"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+          <button type="submit" class="btn-form">Entrar</button>
+          <div class="form-err" id="loginErr"></div>
+        </form>
+      </div>
+
+      <div class="tab-content" id="tab-register">
+        <form onsubmit="registerEmail(event)">
+          <div class="form-group-sm"><label>Nombre</label><input type="text" id="regName" placeholder="Tu nombre"></div>
+          <div class="form-group-sm"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"></div>
+          <div class="form-group-sm"><label>Contraseña</label><input type="password" id="regPass" placeholder="••••••••"></div>
+          <button type="submit" class="btn-form">Crear cuenta</button>
+          <div class="form-err" id="regErr"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL SALA CREADA ── -->
+  <div class="modal-overlay" id="roomCreatedModal">
+    <div class="modal" style="text-align:center;">
+      <button class="modal-close" onclick="document.getElementById('roomCreatedModal').classList.remove('show')">✕</button>
+      <h2>🎉 ¡Sala creada!</h2>
+      <p style="color:#8888aa;font-size:14px;margin-bottom:8px;">Comparte este código con tus amigos</p>
+      <div class="room-code-display" id="newRoomCode">——</div>
+      <div class="modal-actions">
+        <button class="btn-copy" id="btnCopyLink">Copiar link</button>
+        <button class="btn-go" onclick="goToRoom()">Ir a la sala →</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    let yieldVal = 0;
-    setInterval(() => {
-      yieldVal += 0.003;
-      document.getElementById('yieldCounter').textContent = '$' + yieldVal.toFixed(2) + ' MXN';
-    }, 1000);
+    // ── STATE ──
+    const MONAD = { chainId:'0x279F', chainName:'Monad Testnet', nativeCurrency:{name:'Monad',symbol:'MON',decimals:18}, rpcUrls:['https://testnet-rpc.monad.xyz'], blockExplorerUrls:['https://testnet.monadexplorer.com'] };
+    let connectedWallet = null;
+    let currentUser = { id: null, name: null, wallet: null };
+    let createdRoomId = null;
+    let foundRoomId = null;
+
+    // ── INIT ──
+    function init() {
+      const uid = localStorage.getItem("zento_user_id");
+      if (uid) {
+        currentUser.id = uid;
+        currentUser.name = localStorage.getItem("zento_user_name");
+        currentUser.wallet = localStorage.getItem("zento_wallet");
+        updateNavAuth();
+      }
+      loadRooms();
+      startYieldTicker();
+    }
+
+    function updateNavAuth() {
+      const btnLogin  = document.getElementById('btnLoginToggle');
+      const btnLogout = document.getElementById('btnLogout');
+      const wBadge    = document.getElementById('navWalletBadge');
+      const uBadge    = document.getElementById('navUserBadge');
+
+      if (currentUser.id) {
+        btnLogin.style.display = 'none';
+        btnLogout.style.display = 'block';
+        if (currentUser.wallet) {
+          wBadge.classList.add('show');
+          document.getElementById('navWalletAddr').textContent = currentUser.wallet.slice(0,6)+'...'+currentUser.wallet.slice(-4);
+          uBadge.classList.remove('show');
+        } else {
+          uBadge.classList.add('show');
+          document.getElementById('navUserName').textContent = currentUser.name;
+          wBadge.classList.remove('show');
+        }
+      } else {
+        btnLogin.style.display = 'block';
+        btnLogout.style.display = 'none';
+        wBadge.classList.remove('show');
+        uBadge.classList.remove('show');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("zento_user_id");
+      localStorage.removeItem("zento_user_name");
+      localStorage.removeItem("zento_wallet");
+      currentUser = { id:null, name:null, wallet:null };
+      updateNavAuth();
+    }
+
+    // ── YIELD TICKER (mock) ──
+    function startYieldTicker() {
+      let v = 0;
+      setInterval(() => {
+        v += 0.002137;
+        document.getElementById('heroYield').textContent = '$' + v.toFixed(6);
+      }, 1000);
+    }
+
+    // ── LOGIN MODAL ──
+    document.getElementById('btnLoginToggle').addEventListener('click', () => {
+      document.getElementById('loginModal').classList.add('show');
+    });
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.remove('show');
+      connectedWallet = null;
+      document.getElementById('connectedRow').classList.remove('show');
+      document.getElementById('btnEnterWallet').classList.remove('show');
+      document.getElementById('btnConnectWallet').disabled = false;
+      document.getElementById('btnConnectWallet').innerHTML = '<svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="6" fill="#F6851B"/><path d="M17 5L12.3 8.5L13.2 6.1L17 5Z" fill="#E2761B"/><path d="M5 5L9.6 8.6L8.8 6.1L5 5Z" fill="#E4761B"/></svg> Conectar MetaMask';
+    }
+
+    // Tab switching in modal
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── WALLET CONNECT ──
+    async function connectWallet() {
+      const btn = document.getElementById('btnConnectWallet');
+      if (!window.ethereum) { alert('Instala MetaMask en metamask.io'); return; }
+      btn.disabled = true;
+      btn.textContent = 'Conectando...';
+      try {
+        try {
+          await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{chainId:MONAD.chainId}] });
+        } catch(e) {
+          if (e.code===4902) await window.ethereum.request({ method:'wallet_addEthereumChain', params:[MONAD] });
+          else throw e;
+        }
+        const accounts = await window.ethereum.request({ method:'eth_requestAccounts' });
+        connectedWallet = accounts[0];
+        document.getElementById('modalWalletAddr').textContent = connectedWallet.slice(0,6)+'...'+connectedWallet.slice(-4);
+        document.getElementById('connectedRow').classList.add('show');
+        document.getElementById('btnEnterWallet').classList.add('show');
+        btn.textContent = '✅ Wallet conectada';
+      } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="6" fill="#F6851B"/><path d="M17 5L12.3 8.5L13.2 6.1L17 5Z" fill="#E2761B"/><path d="M5 5L9.6 8.6L8.8 6.1L5 5Z" fill="#E4761B"/></svg> Conectar MetaMask';
+        if (e.code !== 4001) alert('Error: ' + e.message);
+      }
+    }
+
+    async function enterWithWallet() {
+      if (!connectedWallet) return;
+      const userId = 'wallet-' + connectedWallet.toLowerCase();
+      const name = connectedWallet.slice(0,6)+'...'+connectedWallet.slice(-4);
+      try {
+        await fetch('/api/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ nombre:name, email:connectedWallet+'@wallet.eth', walletAddress:connectedWallet }) });
+      } catch(e) {}
+      localStorage.setItem("zento_user_id", userId);
+      localStorage.setItem("zento_user_name", name);
+      localStorage.setItem("zento_wallet", connectedWallet);
+      currentUser = { id:userId, name, wallet:connectedWallet };
+      updateNavAuth();
+      closeLoginModal();
+    }
+
+    // ── EMAIL AUTH ──
+    function loginEmail(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      if (!email) { showErr('loginErr','Ingresa tu email'); return; }
+      const userId = 'user-' + Date.now();
+      localStorage.setItem("zento_user_id", userId);
+      localStorage.setItem("zento_user_name", email.split('@')[0]);
+      localStorage.removeItem("zento_wallet");
+      currentUser = { id:userId, name:email.split('@')[0], wallet:null };
+      updateNavAuth();
+      closeLoginModal();
+    }
+
+    async function registerEmail(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('regName').value;
+      const email  = document.getElementById('regEmail').value;
+      if (!nombre||!email) { showErr('regErr','Completa todos los campos'); return; }
+      try { await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,email})}); } catch(e){}
+      const userId = 'user-' + Date.now();
+      localStorage.setItem("zento_user_id", userId);
+      localStorage.setItem("zento_user_name", nombre);
+      localStorage.removeItem("zento_wallet");
+      currentUser = { id:userId, name:nombre, wallet:null };
+      updateNavAuth();
+      closeLoginModal();
+    }
+
+    function showErr(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display='none', 3000);
+    }
+
+    // ── ROOMS ──
+    async function loadRooms() {
+      try {
+        const res = await fetch('/api/rooms');
+        const rooms = await res.json();
+        const grid = document.getElementById('roomsGrid');
+        if (!rooms.length) { grid.innerHTML = '<div style="color:#8888aa;font-size:14px;">No hay salas activas aún. ¡Crea la primera!</div>'; return; }
+        grid.innerHTML = rooms.map(r => `
+          <div class="room-card" onclick="quickJoin('${r.id}')">
+            <h3>${r.nombre}<span class="chip chip-${r.estado}">${r.estado}</span></h3>
+            <div class="meta">${r.juego} · ${r.montoEntrada} MXN · ${r.diasDuracion} días</div>
+            <div class="code">${r.id}</div>
+          </div>
+        `).join('');
+      } catch(e) { document.getElementById('roomsGrid').innerHTML = '<div style="color:#8888aa;font-size:14px;">No se pudieron cargar las salas.</div>'; }
+    }
+
+    function requireLogin() {
+      if (!currentUser.id) {
+        document.getElementById('loginModal').classList.add('show');
+        return false;
+      }
+      return true;
+    }
+
+    // Create room
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!requireLogin()) return;
+      const msgEl = document.getElementById('createMsg');
+      msgEl.className='msg'; msgEl.style.display='none';
+      try {
+        const res = await fetch('/api/rooms', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+          nombre: document.getElementById('roomName').value,
+          juego: document.getElementById('roomGame').value,
+          montoEntrada: parseFloat(document.getElementById('roomAmount').value),
+          diasDuracion: parseInt(document.getElementById('roomDays').value),
+          creadorId: currentUser.id
+        })});
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error||'Error al crear sala');
+        createdRoomId = data.id;
+        document.getElementById('newRoomCode').textContent = data.id;
+        document.getElementById('roomCreatedModal').classList.add('show');
+        loadRooms();
+      } catch(err) { msgEl.textContent=err.message; msgEl.className='msg error'; }
+    });
+
+    document.getElementById('btnCopyLink').addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.origin + '/room.html?roomId=' + createdRoomId);
+      document.getElementById('btnCopyLink').textContent = '¡Copiado!';
+      setTimeout(() => document.getElementById('btnCopyLink').textContent='Copiar link', 2000);
+    });
+
+    function goToRoom() {
+      window.location.href = `room.html?roomId=${createdRoomId}&userId=${currentUser.id}`;
+    }
+
+    // Search room
+    async function searchRoom() {
+      const code = document.getElementById('joinCode').value.trim().toUpperCase();
+      const msgEl = document.getElementById('searchMsg');
+      const infoEl = document.getElementById('roomInfo');
+      msgEl.className='msg'; msgEl.style.display='none'; infoEl.style.display='none';
+      if (!code) return;
+      try {
+        const res = await fetch('/api/rooms/' + code);
+        if (!res.ok) { msgEl.textContent='Sala no encontrada'; msgEl.className='msg error'; return; }
+        const r = await res.json();
+        foundRoomId = r.id;
+        document.getElementById('ri-nombre').textContent = r.nombre;
+        document.getElementById('ri-juego').textContent  = r.juego;
+        document.getElementById('ri-monto').textContent  = r.montoEntrada + ' MXN';
+        document.getElementById('ri-estado').textContent = r.estado;
+        document.getElementById('ri-jugadores').textContent = (r.jugadores||[]).length + ' jugadores';
+        infoEl.style.display = 'block';
+      } catch(err) { msgEl.textContent='Error al buscar sala'; msgEl.className='msg error'; }
+    }
+
+    async function joinRoom() {
+      if (!requireLogin()) return;
+      if (!foundRoomId) return;
+      const msgEl = document.getElementById('joinMsg');
+      msgEl.className='msg'; msgEl.style.display='none';
+      try {
+        const res = await fetch('/api/rooms/'+foundRoomId+'/join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUser.id}) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error||'Error al unirse');
+        window.location.href = `room.html?roomId=${foundRoomId}&userId=${currentUser.id}`;
+      } catch(err) { msgEl.textContent=err.message; msgEl.className='msg error'; }
+    }
+
+    function quickJoin(roomId) {
+      document.getElementById('joinCode').value = roomId;
+      searchRoom();
+      document.getElementById('roomInfo').scrollIntoView({behavior:'smooth'});
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('loginModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('loginModal')) closeLoginModal();
+    });
+    document.getElementById('roomCreatedModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('roomCreatedModal')) document.getElementById('roomCreatedModal').classList.remove('show');
+    });
+
+    init();
   </script>
 </body>
 </html>
