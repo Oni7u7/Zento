@@ -62,20 +62,24 @@ export default function RampPanel({ account }) {
         setOrgId(identityData?.id ?? null)
         if (list.length) setSelectedAsset(list[0].identifier ?? list[0].id)
         if (firstBankId) setSelectedBank(firstBankId)
-        if (customerId) setTncCustomerId(customerId)
+        // Usar orgId para T&C (customerId de registerWallet no pertenece a la org)
+        const orgIdForTnC = identityData?.id ?? null
+        if (orgIdForTnC) setTncCustomerId(orgIdForTnC)
         if (firstBankId) setTncBankId(firstBankId)
 
-        // 2. Aceptar T&C
-        if (customerId && firstBankId) {
+        console.log('[Init] orgId para T&C:', orgIdForTnC, '| firstBankId:', firstBankId)
+
+        // 2. Aceptar T&C usando orgId
+        if (orgIdForTnC && firstBankId) {
           try {
-            await acceptTnC(customerId, firstBankId)
+            await acceptTnC(orgIdForTnC, firstBankId)
             setWalletStatus('ok')
           } catch (e) {
             console.warn('[T&C] Error al aceptar:', e.message)
             setWalletStatus('pending')
           }
         } else {
-          console.warn('[Init] Falta customerId o firstBankId para aceptar T&C | customerId:', customerId, '| firstBankId:', firstBankId)
+          console.warn('[Init] Falta orgId o firstBankId para aceptar T&C | orgId:', orgIdForTnC, '| firstBankId:', firstBankId)
           setWalletStatus('pending')
         }
       } catch (err) {
