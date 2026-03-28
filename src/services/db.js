@@ -41,10 +41,11 @@ function updateRoom(id, patch) {
 }
 
 // Players
-function addPlayerToRoom(userId, roomId, depositAmount) {
+function addPlayerToRoom(userId, roomId, depositAmount, nombre) {
   const player = {
     userId,
     roomId,
+    nombre: nombre || userId,
     depositAmount,
     score: 0,
     status: 'pending',

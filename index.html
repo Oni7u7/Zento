@@ -719,7 +719,9 @@
           cd.className = 'contract-info';
           cd.style = 'margin-top:10px;padding:10px;background:#0a0f1a;border:1px solid #7c3aed;border-radius:8px;';
           cd.innerHTML = `<div style="font-size:11px;color:#8888aa;">⛓ Contrato en Monad Testnet</div><div style="font-family:monospace;font-size:12px;color:#a78bfa;word-break:break-all;margin-top:4px;">${r.contractAddress}</div><a href="https://testnet.monadexplorer.com/address/${r.contractAddress}" target="_blank" style="font-size:11px;color:#7c3aed;">Ver en Explorer →</a>`;
-          ri.insertBefore(cd, ri.querySelector('#btnJoinRoom'));
+          // Insertar antes de joinActions (no antes de btnJoinRoom que ya no es hijo directo)
+          const joinActions = document.getElementById('joinActions');
+          ri.insertBefore(cd, joinActions);
         }
         infoEl.style.display = 'block';
         infoEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

@@ -89,22 +89,22 @@ async function getRoom(req, res) {
 
 async function joinRoom(req, res) {
   try {
-    const { userId } = req.body;
+    const { userId, nombre } = req.body;
+    if (!userId) return res.status(400).json({ error: 'userId requerido' });
     const room = db.getRoomById(req.params.roomId);
     if (!room) return res.status(404).json({ error: 'Sala no encontrada' });
-    if (room.estado === 'playing') return res.status(400).json({ error: 'La sala ya está en juego' });
     if (room.estado === 'finished') return res.status(400).json({ error: 'La sala ya terminó' });
 
     const existing = db.getPlayerInRoom(userId, room.id);
-    if (existing) return res.status(400).json({ error: 'Ya estás en esta sala' });
-
-    db.addPlayerToRoom(userId, room.id, 0);
+    if (!existing) {
+      db.addPlayerToRoom(userId, room.id, 0, nombre);
+    }
     const updated = db.getRoomById(room.id);
 
     const players = db.getRoomPlayers(room.id);
     const playerList = players.map(p => {
       const user = db.getUserById(p.userId);
-      return { userId: p.userId, nombre: user?.apodo || user?.nombre || p.userId, score: p.score, status: p.status };
+      return { userId: p.userId, nombre: p.nombre || user?.apodo || user?.nombre || p.userId, score: p.score, status: p.status };
     });
 
     return res.json({ ...updated, players: playerList });
