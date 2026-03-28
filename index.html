@@ -344,9 +344,9 @@
 
         <div class="form-group" style="margin-bottom:18px;">
           <label>Código de sala</label>
-          <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6" style="text-transform:uppercase;">
+          <input type="text" id="joinCode" class="input-big" placeholder="ABCD12" maxlength="6" style="text-transform:uppercase;" onkeydown="if(event.key==='Enter') searchRoom()">
         </div>
-        <button class="btn-secondary" onclick="searchRoom()">Buscar sala</button>
+        <button class="btn-secondary" id="btnSearch" onclick="searchRoom()">🔍 Buscar sala</button>
 
         <div class="room-info" id="roomInfo">
           <h3 id="ri-nombre"></h3>
@@ -688,14 +688,19 @@
       const code = document.getElementById('joinCode').value.trim().toUpperCase();
       const msgEl = document.getElementById('searchMsg');
       const infoEl = document.getElementById('roomInfo');
-      msgEl.className='msg'; msgEl.style.display='none'; infoEl.style.display='none';
-      // Reset deposit panel
-      document.getElementById('depositPanel').style.display = 'none';
-      document.getElementById('btnJoinRoom').style.display = 'block';
-      if (!code) return;
+      const btnSearch = document.getElementById('btnSearch');
+      msgEl.className='msg'; msgEl.style.display='none';
+      infoEl.style.display='none';
+      foundRoomId = null;
+      foundRoomContractAddress = null;
+      if (!code) { msgEl.textContent='Escribe el código de la sala'; msgEl.className='msg error'; return; }
+      btnSearch.textContent = '⏳ Buscando...';
+      btnSearch.disabled = true;
       try {
         const res = await fetch('/api/rooms/' + code);
-        if (!res.ok) { msgEl.textContent='Sala no encontrada'; msgEl.className='msg error'; return; }
+        btnSearch.textContent = '🔍 Buscar sala';
+        btnSearch.disabled = false;
+        if (!res.ok) { msgEl.textContent='❌ Sala "'+code+'" no encontrada. Verifica el código.'; msgEl.className='msg error'; return; }
         const r = await res.json();
         foundRoomId = r.id;
         foundRoomContractAddress = r.contractAddress || null;
@@ -717,7 +722,13 @@
           ri.insertBefore(cd, ri.querySelector('#btnJoinRoom'));
         }
         infoEl.style.display = 'block';
-      } catch(err) { msgEl.textContent='Error al buscar sala'; msgEl.className='msg error'; }
+        infoEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch(err) {
+        btnSearch.textContent = '🔍 Buscar sala';
+        btnSearch.disabled = false;
+        msgEl.textContent = 'Error al buscar sala. Intenta de nuevo.';
+        msgEl.className='msg error';
+      }
     }
 
     // Mostrar los botones correctos según si hay contrato + wallet
