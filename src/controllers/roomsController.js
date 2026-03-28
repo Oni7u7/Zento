@@ -69,7 +69,7 @@ async function getRoom(req, res) {
     const scoreboard = players
       .map((p, i) => {
         const user = db.getUserById(p.userId);
-        return { userId: p.userId, nombre: user?.apodo || user?.nombre || p.userId, score: p.score, status: p.status };
+        return { userId: p.userId, nombre: p.nombre || user?.apodo || user?.nombre || p.userId, score: p.score, status: p.status };
       })
       .sort((a, b) => b.score - a.score)
       .map((p, i) => ({ ...p, posicion: i + 1 }));
